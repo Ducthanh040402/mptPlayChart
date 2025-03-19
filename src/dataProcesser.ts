@@ -23,7 +23,6 @@ export class DataProcesser {
         if (!this.options.dataViews || !this.options.dataViews[0]) {
             return [];
         }
-
         const dataView = this.options.dataViews[0];
         const categorical = dataView.categorical;
 
@@ -37,7 +36,7 @@ export class DataProcesser {
             dataPoints: xValues.map((x, i) => ({
                 x: +x,
                 y: +ySeries[i]
-            }))
+            })).sort((a, b) => a.x - b.x) // sort by x value if not already sorted
         }));
 
         this.data = alldata;

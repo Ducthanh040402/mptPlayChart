@@ -40,7 +40,7 @@ import { VisualFormattingSettingsModel } from "./settings";
 import * as d3 from "d3";
 import { DataProcesser } from "./dataProcesser";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
-
+import { renderLineChart } from "./renderLineChart";
 import { DataPoint, LineData, defaultColors } from "./interface"
 import {
     BaseType,
@@ -75,12 +75,14 @@ export class Visual implements IVisual {
         this.viewport = options.viewport
 
         console.log("dataUse", this.lineDataPoints)
-        d3.select(this.target).selectAll("*").remove();
         this.svg
             .attr("width", this.viewport.width)
             .attr("height", this.viewport.height);
+        this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
+
 
     }
+
 
     /**
      * Returns properties pane formatting model content hierarchies, properties and latest formatting values, Then populate properties pane.

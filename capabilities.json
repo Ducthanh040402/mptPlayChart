@@ -42,7 +42,7 @@
                         "fill": {}
                     }
                 },
-                 "fontSize": {
+                "fontSize": {
                     "type": {
                         "formatting": {
                             "fontSize": true
@@ -58,6 +58,11 @@
                 "categories": {
                     "for": {
                         "in": "category"
+                    },
+                    "dataReductionAlgorithm": {
+                        "window": {
+                            "count": 30000
+                        }
                     }
                 },
                 "values": {
@@ -65,6 +70,11 @@
                         {
                             "bind": {
                                 "to": "measure"
+                            },
+                            "dataReductionAlgorithm": {
+                                "window": {
+                                    "count": 30000
+                                }
                             }
                         }
                     ]
