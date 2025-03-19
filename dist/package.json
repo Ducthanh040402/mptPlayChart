@@ -1,0 +1,17 @@
+{
+    "version": "1.0.0",
+    "author": {"name":"thanh","email":"thanh442002@gmail.com"},
+    "resources": [
+        {
+            "resourceId": "rId0",
+            "sourceType": 5,
+            "file": "resources/mptPlayChart.pbiviz.json"
+        }
+    ],
+    "visual": {"name":"mptPlayChart","displayName":"mptPlayChart","guid":"mptPlayChart","visualClassName":"Visual","version":"1.0.0","description":"just Test","supportUrl":"https://akselos.com","gitHubUrl":""},
+    "metadata": {
+        "pbivizjson": {
+            "resourceId": "rId0"
+        }
+    }  
+}

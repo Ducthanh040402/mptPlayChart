@@ -1,1 +1,25 @@
-{"visual":{"name":"mptPlayChart","displayName":"mptPlayChart","guid":"mptPlayChart7DFC636AC3F24056868BA3E852AC8AD2","visualClassName":"Visual","version":"1.0.0","description":"","supportUrl":"","gitHubUrl":""},"apiVersion":"5.1.0","author":{"name":"","email":""},"assets":{"icon":"assets/icon.png"},"externalJS":null,"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[]}
+{
+    "visual": {
+        "name": "mptPlayChart",
+        "displayName": "mptPlayChart",
+        "guid": "mptPlayChart",
+        "visualClassName": "Visual",
+        "version": "1.0.0",
+        "description": "just Test",
+        "supportUrl": "https://akselos.com",
+        "gitHubUrl": ""
+    },
+    "apiVersion": "5.1.0",
+    "author": {
+        "name": "thanh",
+        "email": "thanh442002@gmail.com"
+    },
+    "assets": {
+        "icon": "assets/icon_chart.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": []
+}
