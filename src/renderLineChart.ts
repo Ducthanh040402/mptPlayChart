@@ -14,75 +14,124 @@ type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 export function renderLineChart(data: LineData[],
     viewport: powerbi.IViewport, svg: Selection<SVGSVGElement>, settings: VisualFormattingSettingsModel) {
-    const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+
+    const margin = { top: 30, right: 0, bottom: 30, left: 50 };
     const width = viewport.width - margin.left - margin.right;
     const height = viewport.height - margin.top - margin.bottom;
 
     svg.selectAll("*").remove();
+    const formatNumber = d3.format(".0f");
 
-    const x = scaleBand()
+    const x = d3.scaleLinear()
         .range([0, width])
-        .padding(0.1)
-        .domain(data[0].dataPoints.map(d => d.x.toString()));
+        .domain([d3.min(data[0].dataPoints, (d) => d.x)! - 20, d3.max(data[0].dataPoints, (d) => d.x)!]);
 
-    const y = scaleLinear()
+    const y = d3.scaleLinear()
         .range([height, 0])
-        .domain([0, d3.max(data, d => d3.max(d.dataPoints, d => d.y))]);
+        .domain([0, 800]);
 
     const g = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    g.append("g")
+    g.append("defs").append("clipPath")
+        .attr("id", "clip")
+        .append("rect")
+        .attr("x", -5)
+        .attr("y", -2)
+        .attr("width", width)
+        .attr("height", height + 2);
+
+    g.append("rect")
+        .attr("x", -5)
+        .attr("y", -5)
+        .attr("width", width)
+        .attr("height", height + 10)
+        .attr("class", "tooltip-overlay")
+        .attr("fill", "white");
+
+    const xAxis = g.append("g")
+        .attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x));
+        .call(d3.axisBottom(x).ticks(3).tickFormat(formatNumber));
+
+    const yAxis = g.append("g")
+        .attr("class", "y-axis")
+        .call(d3.axisLeft(y).ticks(4).tickFormat(formatNumber));
+
+    //#region Grid
+    const xGrid = d3.axisBottom(x)
+        .tickSize(-height)
+        .ticks(3)
+        .tickFormat(() => "");
 
     g.append("g")
-        .call(d3.axisLeft(y))
-        .append("text")
-        .attr("fill", "#000")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", "0.71em")
-        .attr("text-anchor", "end")
-        .text("Value");
+        .attr("class", "x-grid")
+        .attr("transform", `translate(0,${height})`)
+        .call(xGrid)
+        .selectAll("path, line")
+        .style("stroke", "grey")
+        .style("opacity", 0.35)
+        .style("stroke-dasharray", "1 4");
 
+    const yGrid = d3.axisLeft(y)
+        .tickSize(-width)
+        .ticks(5)
+        .tickFormat(() => "");
+
+    g.append("g")
+        .attr("class", "y-grid")
+        .call(yGrid)
+        .selectAll("path, line")
+        .style("stroke", "grey")
+        .style("opacity", 0.35)
+        .style("stroke-dasharray", "1 4");
+
+    g.selectAll(".y-grid path, .x-grid path").style("stroke", "none");
+
+    //#endregion
+    xAxis.select("path").style("stroke", "none");
+    xAxis.selectAll("line").style("stroke", "none");
+    yAxis.select("path").style("stroke", "none");
+    yAxis.selectAll("line").style("stroke", "none");
+
+
+    const chartArea = g.append("g")
+        .attr("class", "chart-area")
+        .attr("clip-path", "url(#clip)")
+    // .attr("transform", `translate(${margin.left}, ${margin.top })`);
+
+
+    data[0].isDrawLine = false
     data.forEach((lineData, index) => {
-        const line = d3.line<DataPoint>()
-            .x(d => x(d.x.toString()))
-            .y(d => y(d.y));
+        const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
+        console.log(filteredData)
+        if (!lineData.isDrawLine) {
+            const line = d3.line<DataPoint>()
+                .x(d => x(d.x))
+                .y(d => Math.min(y(d.y), height)); // Limit height
 
-        g.append("path")
-            .datum(lineData.dataPoints)
-            .attr("fill", "none")
-            .attr("stroke", lineData.color)
-            .attr("stroke-linejoin", "round")
-            .attr("stroke-linecap", "round")
-            .attr("stroke-width", 1.5)
-            .attr("d", line);
-    }
-    );
-
-    // Add legend
-    const legend = svg.append("g")
-        .attr("transform", `translate(${width},${margin.top})`)
-        .attr("text-anchor", "end")
-        .selectAll("g")
-        .data(data.map(d => d.name))
-        .enter().append("g")
-        .attr("transform", (d, i) => `translate(0,${i * 20})`);
-
-    legend.append("rect")
-        .attr("x", -19)
-        .attr("width", 19)
-        .attr("height", 19)
-        .attr("fill", (d, i) => defaultColors[i % defaultColors.length]);
-
-    legend.append("text")
-        .attr("x", -24)
-        .attr("y", 9.5)
-        .attr("dy", "0.32em")
-        .text(d => d);
+            chartArea.append("path")
+                .datum(filteredData)
+                .attr("class", "line-interact")
+                .attr("fill", "none")
+                .attr("stroke", lineData.color)
+                .attr("stroke-linejoin", "round")
+                .attr("stroke-linecap", "round")
+                .attr("stroke-width", 2.5)
+                .attr("d", line);
+        }
+        else {
+            chartArea.selectAll(`.point-${index}`)
+                .data(filteredData)
+                .enter().append("circle")
+                .attr("class", `point-${index}`)
+                .attr("cx", d => x(d.x))
+                .attr("cy", d => y(d.y))
+                .attr("r", 4)
+                .attr("fill", lineData.color);
+        }
+    });
 
     return svg;
-
 }
+

@@ -31,12 +31,13 @@ export class DataProcesser {
         var seriesNames = categorical.values.map(element => element.source.displayName);
 
         var alldata: LineData[] = yValues.map((ySeries, index) => ({
-            name: seriesNames[index],
-            color: this.getColorForSeries(categorical.values[index], index),
-            dataPoints: xValues.map((x, i) => ({
-                x: +x,
-                y: +ySeries[i]
-            })).sort((a, b) => a.x - b.x) // sort by x value if not already sorted
+                name: seriesNames[index],
+                color: this.getColorForSeries(categorical.values[index], index),
+                isDrawLine:true,
+                dataPoints: xValues.map((x, i) => ({
+                    x: +x,
+                    y: +ySeries[i]
+                })).sort((a, b) => a.x - b.x) // sort by x value if not already sorted           
         }));
 
         this.data = alldata;
