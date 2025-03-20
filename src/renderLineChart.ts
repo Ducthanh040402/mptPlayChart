@@ -44,6 +44,7 @@ export function renderLineChart(data: LineData[],
     g.append("rect")
         .attr("x", -5)
         .attr("y", -5)
+        .datum(data)
         .attr("width", width)
         .attr("height", height + 10)
         .attr("class", "tooltip-overlay")

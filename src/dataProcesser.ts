@@ -9,8 +9,10 @@ import { DataPoint, LineData, defaultColors } from "./interface"
 
 export class DataProcesser {
     private options;
+    private host: IVisualHost;    
     private data: LineData[]
-    constructor(options: VisualUpdateOptions) {
+    constructor(options: VisualUpdateOptions,host: IVisualHost) {
+        this.host = host;
         this.options = options;
     }
 
@@ -36,7 +38,8 @@ export class DataProcesser {
                 isDrawLine:true,
                 dataPoints: xValues.map((x, i) => ({
                     x: +x,
-                    y: +ySeries[i]
+                    y: +ySeries[i],
+                    selectionId: this.host.createSelectionIdBuilder().withCategory(categorical.categories[0], i).createSelectionId(),
                 })).sort((a, b) => a.x - b.x) // sort by x value if not already sorted           
         }));
 

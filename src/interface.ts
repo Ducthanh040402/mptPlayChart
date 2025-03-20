@@ -1,6 +1,7 @@
 export interface DataPoint {
     x: number;
     y: number;
+    selectionId: powerbi.visuals.ISelectionId;
 }
 
 export interface LineData {
@@ -11,8 +12,8 @@ export interface LineData {
 }
 
 export interface Tooltip {
-    lineData : LineData[];
-    pointData : DataPoint[];
+    lineData: LineData[];
+    pointData: DataPoint[];
 }
 export const defaultColors = [
     "#ff0000",

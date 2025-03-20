@@ -28,6 +28,7 @@
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import "./../style/visual.less";
+import { createTooltipServiceWrapper, ITooltipServiceWrapper, TooltipEnabledDataPoint } from "powerbi-visuals-utils-tooltiputils";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -35,7 +36,6 @@ import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import FormattingModel = powerbi.visuals.FormattingModel;
-
 import { VisualFormattingSettingsModel } from "./settings";
 import * as d3 from "d3";
 import { DataProcesser } from "./dataProcesser";
@@ -57,11 +57,13 @@ export class Visual implements IVisual {
     private lineDataPoints: LineData[];
     private pointData: DataPoint[];
     private svg: Selection<SVGSVGElement>;
-
+    private tooltipServiceWrapper: ITooltipServiceWrapper;
     constructor(options: VisualConstructorOptions) {
         console.log('Visual constructor', options);
         this.formattingSettingsService = new FormattingSettingsService();
         this.target = options.element;
+        this.host = options.host;
+        this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, options.element);
         this.svg = d3Select(this.target)
             .append("svg")
             .classed("linechart", true);
@@ -70,7 +72,8 @@ export class Visual implements IVisual {
 
     public update(options: VisualUpdateOptions) {
         this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews);
-        this.data = new DataProcesser(options);
+
+        this.data = new DataProcesser(options, this.host);
         this.lineDataPoints = this.data.processData();
         this.viewport = options.viewport
 
@@ -80,6 +83,18 @@ export class Visual implements IVisual {
             .attr("height", this.viewport.height);
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
 
+        this.tooltipServiceWrapper.addTooltip(this.svg.selectAll("rect.tooltip-overlay"),
+            (tooltipEvent: TooltipEnabledDataPoint) => this.getTooltipData(tooltipEvent[0]),
+            (tooltipEvent: TooltipEnabledDataPoint) => null);
+
+    }
+    getTooltipData(value: any): powerbi.extensibility.VisualTooltipDataItem[] {
+        return [{
+            displayName: value.name,
+            value: value.dataPoints[0].y.toString(),
+            color: value.color
+
+        }];
 
     }
 
