@@ -24,12 +24,13 @@ export function renderLineChart(data: LineData[],
 
     const x = d3.scaleLinear()
         .range([0, width])
-        .domain([d3.min(data[0].dataPoints, (d) => d.x)! - 20, d3.max(data[0].dataPoints, (d) => d.x)!]);
+        .domain([d3.min(data[0].dataPoints, (d) => d.x)! - 20, d3.max(data[0].dataPoints, (d) => d.x)! + 20]);
 
     const y = d3.scaleLinear()
         .range([height, 0])
         .domain([0, 800]);
-
+    
+    svg.datum({x,y})
     const g = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -39,7 +40,7 @@ export function renderLineChart(data: LineData[],
         .attr("x", -5)
         .attr("y", -2)
         .attr("width", width)
-        .attr("height", height + 2);
+        .attr("height", height + 10);
 
     g.append("rect")
         .attr("x", -5)
@@ -103,6 +104,7 @@ export function renderLineChart(data: LineData[],
 
 
     data[0].isDrawLine = false
+    var dataFiltered = []
     data.forEach((lineData, index) => {
         const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
         console.log(filteredData)

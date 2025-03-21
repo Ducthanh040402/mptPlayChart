@@ -83,20 +83,57 @@ export class Visual implements IVisual {
             .attr("height", this.viewport.height);
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
 
+        this.mouseEventTooltip(this.svg, this.lineDataPoints);
         this.tooltipServiceWrapper.addTooltip(this.svg.selectAll("rect.tooltip-overlay"),
             (tooltipEvent: TooltipEnabledDataPoint) => this.getTooltipData(tooltipEvent[0]),
             (tooltipEvent: TooltipEnabledDataPoint) => null);
 
+
     }
     getTooltipData(value: any): powerbi.extensibility.VisualTooltipDataItem[] {
+        console.log("value tooltip", value)
         return [{
             displayName: value.name,
             value: value.dataPoints[0].y.toString(),
-            color: value.color
-
+            color: value.color,
+            header: "lable header"
         }];
 
     }
+
+    public mouseEventTooltip(svg: any, data: LineData[]) {
+        svg.select("rect.tooltip-overlay").on("mousemove", function (event) {
+
+            const scales = svg.datum();
+            if (!scales) return;
+
+            const xScale = scales.xScale;
+            const yScale = scales.yScale;
+
+
+            let [mouseX, mouseY] = d3.pointer(event);
+            let mouseXValue = xScale.invert(mouseX);
+
+
+            let closestPoint: DataPoint | null = null;
+            let minDistance = Infinity;
+
+            data.forEach(lineData => {
+                lineData.dataPoints.forEach(point => {
+                    let distance = Math.abs(point.x - mouseXValue);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestPoint = point;
+                    }
+                });
+            });
+
+            if (closestPoint) {
+                console.log("Closest Point:", closestPoint);
+            }
+        });
+    }
+
 
 
     /**
