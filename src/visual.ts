@@ -88,6 +88,8 @@ export class Visual implements IVisual {
 
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
         this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
+        this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints);
+        
     }
 
 

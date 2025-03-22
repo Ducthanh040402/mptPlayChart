@@ -3,6 +3,17 @@ export interface DataPoint {
     y: number;
     selectionId: powerbi.visuals.ISelectionId;
 }
+export interface SettingsPanel {
+    color: string;
+    styleLine: string;
+    isDrawLine: boolean;
+    isDrawPoint: boolean;
+    isDrawGrid: boolean;
+    isDrawAxis: boolean;
+    isDrawLabel: boolean;
+    isDrawLegend: boolean;
+    
+}
 
 export interface LineData {
     name: string;

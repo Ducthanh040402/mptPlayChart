@@ -16,7 +16,7 @@ export class MouseEventChart {
     private svg: d3.Selection<SVGSVGElement, any, any, any>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
 
-    constructor( options: VisualUpdateOptions, host: powerbi.extensibility.visual.IVisualHost) {
+    constructor(options: VisualUpdateOptions, host: powerbi.extensibility.visual.IVisualHost) {
         this.options = options;
         this.host = host;
     }
@@ -98,5 +98,13 @@ export class MouseEventChart {
                 svg.selectAll(".highlight-point").style("opacity", 0);
             });
     }
-   
+
+    public mouseEventSelection(svg: any, data: LineData[]) {
+        const self = this;
+        /**
+         * Add your mouse event code here
+         */
+        return;
+    }
+
 }
