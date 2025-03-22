@@ -29,6 +29,8 @@ import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import "./../style/visual.less";
 import { createTooltipServiceWrapper, ITooltipServiceWrapper, TooltipEnabledDataPoint } from "powerbi-visuals-utils-tooltiputils";
+import { pointer } from "d3";
+import { scaleBand, scaleLinear, ScaleLinear, ScaleBand } from "d3-scale";
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -58,6 +60,7 @@ export class Visual implements IVisual {
     private pointData: DataPoint[];
     private svg: Selection<SVGSVGElement>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
+    private number: number;
     constructor(options: VisualConstructorOptions) {
         console.log('Visual constructor', options);
         this.formattingSettingsService = new FormattingSettingsService();
@@ -67,6 +70,8 @@ export class Visual implements IVisual {
         this.svg = d3Select(this.target)
             .append("svg")
             .classed("linechart", true);
+
+        this.number = 0;
 
     }
 
@@ -81,41 +86,32 @@ export class Visual implements IVisual {
         this.svg
             .attr("width", this.viewport.width)
             .attr("height", this.viewport.height);
+
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
+        this.number++;
+        // this.tooltipServiceWrapper.addTooltip(this.svg.selectAll("rect.tooltip-overlay"),
+        //     (dataTooltip: TooltipEnabledDataPoint) => getTooltipData(dataTooltip),
+        //     () => null
+        // );
+        this.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
 
-        this.mouseEventTooltip(this.svg, this.lineDataPoints);
-        this.tooltipServiceWrapper.addTooltip(this.svg.selectAll("rect.tooltip-overlay"),
-            (tooltipEvent: TooltipEnabledDataPoint) => this.getTooltipData(tooltipEvent[0]),
-            (tooltipEvent: TooltipEnabledDataPoint) => null);
-
-
-    }
-    getTooltipData(value: any): powerbi.extensibility.VisualTooltipDataItem[] {
-        console.log("value tooltip", value)
-        return [{
-            displayName: value.name,
-            value: value.dataPoints[0].y.toString(),
-            color: value.color,
-            header: "lable header"
-        }];
 
     }
+    public mouseEventTooltip(svg: any, data: LineData[], tooltipServiceWrapper: ITooltipServiceWrapper) {
+        svg.selectAll("rect.tooltip-overlay").on("mousemove", function (event) {
+            const scalesX = svg._groups[0][0].__data__.x;
+            const scalesY = svg._groups[0][0].__data__.y;
+            if (!scalesX) return;
+            svg.selectAll(".vertical-line").remove();
+            svg.selectAll(".highlight-point").remove();
 
-    public mouseEventTooltip(svg: any, data: LineData[]) {
-        svg.select("rect.tooltip-overlay").on("mousemove", function (event) {
-
-            const scales = svg.datum();
-            if (!scales) return;
-
-            const xScale = scales.xScale;
-            const yScale = scales.yScale;
-
+            const xScale = scalesX;
+            const yScale = scalesY;
 
             let [mouseX, mouseY] = d3.pointer(event);
             let mouseXValue = xScale.invert(mouseX);
 
-
-            let closestPoint: DataPoint | null = null;
+            let closestPoint: { DataPoint: DataPoint, key } | null = null;
             let minDistance = Infinity;
 
             data.forEach(lineData => {
@@ -123,17 +119,50 @@ export class Visual implements IVisual {
                     let distance = Math.abs(point.x - mouseXValue);
                     if (distance < minDistance) {
                         minDistance = distance;
-                        closestPoint = point;
+                        closestPoint = {
+                            key: lineData.name,
+                            DataPoint: point
+                        };
                     }
                 });
             });
+            const cx = xScale(closestPoint.DataPoint.x);
+            const cy = yScale(closestPoint.DataPoint.y);
+            svg.selectAll("g.chart-area").append("line")
+                .attr("class", "vertical-line")
+                .attr("x1", cx)
+                .attr("x2", cx)
+                .attr("y1", 0)
+                .attr("y2", 300)
+                .attr("stroke", "#000000")
+                .attr("stroke-width", 1)
+                .style("opacity", 1);
 
-            if (closestPoint) {
-                console.log("Closest Point:", closestPoint);
-            }
-        });
+            svg.selectAll("g.chart-area").append("circle")
+                .attr("class", "highlight-point")
+                .attr("cx", cx)
+                .attr("cy", cy)
+                .attr("r", 5)
+                .attr("fill", "blue")
+                .attr("stroke-width", 2)
+                .style("opacity", 1);
+
+            // console.log("tooltip", getTooltipData(closestPoint, svg))
+
+            tooltipServiceWrapper.addTooltip(svg.selectAll("rect.tooltip-overlay"),
+                () => getTooltipData(closestPoint, svg),
+                () => closestPoint.DataPoint.selectionId,
+                true,
+                // () => null
+            );
+
+        })
+            .on("mouseout", function () {
+                svg.selectAll(".vertical-line").style("opacity", 0);
+                svg.selectAll(".highlight-point").style("opacity", 0);
+            });
+
     }
-
 
 
     /**
@@ -143,4 +172,16 @@ export class Visual implements IVisual {
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }
+
+}
+function getTooltipData(closestPoint: any, svg): powerbi.extensibility.VisualTooltipDataItem[] {
+
+    console.log("value tooltip", closestPoint.DataPoint.x)
+    return [{
+        displayName: closestPoint.key,
+        value: `${closestPoint.DataPoint.y}`,
+        color: "red",
+        header: `${closestPoint.DataPoint.x}`
+    }]
+
 }

@@ -28,9 +28,9 @@ export function renderLineChart(data: LineData[],
 
     const y = d3.scaleLinear()
         .range([height, 0])
-        .domain([0, 800]);
-    
-    svg.datum({x,y})
+        .domain([0, 1000000]);
+
+    svg.datum({ x, y })
     const g = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
