@@ -43,6 +43,7 @@ import * as d3 from "d3";
 import { DataProcesser } from "./dataProcesser";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 import { renderLineChart } from "./renderLineChart";
+import { MouseEventChart } from "./mouseEvent";
 import { DataPoint, LineData, defaultColors } from "./interface"
 import {
     BaseType,
@@ -60,7 +61,8 @@ export class Visual implements IVisual {
     private pointData: DataPoint[];
     private svg: Selection<SVGSVGElement>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
-    private number: number;
+    private mouseEvent: MouseEventChart;
+
     constructor(options: VisualConstructorOptions) {
         console.log('Visual constructor', options);
         this.formattingSettingsService = new FormattingSettingsService();
@@ -71,98 +73,23 @@ export class Visual implements IVisual {
             .append("svg")
             .classed("linechart", true);
 
-        this.number = 0;
-
     }
 
     public update(options: VisualUpdateOptions) {
         this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews);
-
         this.data = new DataProcesser(options, this.host);
         this.lineDataPoints = this.data.processData();
         this.viewport = options.viewport
-
         console.log("dataUse", this.lineDataPoints)
         this.svg
             .attr("width", this.viewport.width)
             .attr("height", this.viewport.height);
+        this.mouseEvent = new MouseEventChart(options, this.host);
 
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
-        this.number++;
-        // this.tooltipServiceWrapper.addTooltip(this.svg.selectAll("rect.tooltip-overlay"),
-        //     (dataTooltip: TooltipEnabledDataPoint) => getTooltipData(dataTooltip),
-        //     () => null
-        // );
-        this.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
-
-
+        this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
     }
-    public mouseEventTooltip(svg: any, data: LineData[], tooltipServiceWrapper: ITooltipServiceWrapper) {
-        svg.selectAll("rect.tooltip-overlay").on("mousemove", function (event) {
-            const scalesX = svg._groups[0][0].__data__.x;
-            const scalesY = svg._groups[0][0].__data__.y;
-            if (!scalesX) return;
-            svg.selectAll(".vertical-line").remove();
-            svg.selectAll(".highlight-point").remove();
 
-            const xScale = scalesX;
-            const yScale = scalesY;
-
-            let [mouseX, mouseY] = d3.pointer(event);
-            let mouseXValue = xScale.invert(mouseX);
-
-            let closestPoint: { DataPoint: DataPoint, key } | null = null;
-            let minDistance = Infinity;
-
-            data.forEach(lineData => {
-                lineData.dataPoints.forEach(point => {
-                    let distance = Math.abs(point.x - mouseXValue);
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        closestPoint = {
-                            key: lineData.name,
-                            DataPoint: point
-                        };
-                    }
-                });
-            });
-            const cx = xScale(closestPoint.DataPoint.x);
-            const cy = yScale(closestPoint.DataPoint.y);
-            svg.selectAll("g.chart-area").append("line")
-                .attr("class", "vertical-line")
-                .attr("x1", cx)
-                .attr("x2", cx)
-                .attr("y1", 0)
-                .attr("y2", 300)
-                .attr("stroke", "#000000")
-                .attr("stroke-width", 1)
-                .style("opacity", 1);
-
-            svg.selectAll("g.chart-area").append("circle")
-                .attr("class", "highlight-point")
-                .attr("cx", cx)
-                .attr("cy", cy)
-                .attr("r", 5)
-                .attr("fill", "blue")
-                .attr("stroke-width", 2)
-                .style("opacity", 1);
-
-            // console.log("tooltip", getTooltipData(closestPoint, svg))
-
-            tooltipServiceWrapper.addTooltip(svg.selectAll("rect.tooltip-overlay"),
-                () => getTooltipData(closestPoint, svg),
-                () => closestPoint.DataPoint.selectionId,
-                true,
-                // () => null
-            );
-
-        })
-            .on("mouseout", function () {
-                svg.selectAll(".vertical-line").style("opacity", 0);
-                svg.selectAll(".highlight-point").style("opacity", 0);
-            });
-
-    }
 
 
     /**
@@ -172,16 +99,5 @@ export class Visual implements IVisual {
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }
-
-}
-function getTooltipData(closestPoint: any, svg): powerbi.extensibility.VisualTooltipDataItem[] {
-
-    console.log("value tooltip", closestPoint.DataPoint.x)
-    return [{
-        displayName: closestPoint.key,
-        value: `${closestPoint.DataPoint.y}`,
-        color: "red",
-        header: `${closestPoint.DataPoint.x}`
-    }]
 
 }
