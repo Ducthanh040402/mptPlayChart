@@ -32,7 +32,7 @@ export class MouseEventChart {
     }
     public mouseEventTooltip(svg: any, data: LineData[], tooltipServiceWrapper: ITooltipServiceWrapper) {
         const self = this;
-        svg.selectAll("rect.tooltip-overlay").on("mousemove", function (event) {
+        svg.select("rect.tooltip-overlay").on("mousemove", function (event) {
             const scalesX = svg._groups[0][0].__data__.x;
             const scalesY = svg._groups[0][0].__data__.y;
             if (!scalesX) return;
@@ -63,6 +63,7 @@ export class MouseEventChart {
                     }
                 });
             });
+            console.log("closestPoint", closestPoint)
             if (closestPoint !== null) {
                 console.log("data", closestPoint)
                 const cx = xScale(closestPoint.DataPoint.x);
@@ -86,10 +87,11 @@ export class MouseEventChart {
                     .attr("stroke-width", 2)
                     .style("opacity", 1);
 
-                tooltipServiceWrapper.addTooltip(svg.selectAll("rect.tooltip-overlay"),
+                tooltipServiceWrapper.addTooltip(svg.select("rect.tooltip-overlay"),
                     () => self.getTooltipData(closestPoint),
                     () => closestPoint.DataPoint.selectionId,
                     true
+
                 );
             }
         })
@@ -97,6 +99,7 @@ export class MouseEventChart {
                 svg.selectAll(".vertical-line").style("opacity", 0);
                 svg.selectAll(".highlight-point").style("opacity", 0);
             });
+
     }
 
     public mouseEventSelection(svg: any, data: LineData[]) {

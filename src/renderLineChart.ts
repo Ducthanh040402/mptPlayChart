@@ -49,6 +49,7 @@ export function renderLineChart(data: LineData[],
         .attr("width", width)
         .attr("height", height + 10)
         .attr("class", "tooltip-overlay")
+
         .attr("fill", "white");
 
     const xAxis = g.append("g")
@@ -99,6 +100,7 @@ export function renderLineChart(data: LineData[],
 
     const chartArea = g.append("g")
         .attr("class", "chart-area")
+        .style("pointer-events", "none") // I disable mouse events to pass through, if not, the tooltip will not work and the line will not be drawn
         .attr("clip-path", "url(#clip)")
     // .attr("transform", `translate(${margin.left}, ${margin.top })`);
 
