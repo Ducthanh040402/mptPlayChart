@@ -12,7 +12,7 @@ export interface SettingsPanel {
     isDrawAxis: boolean;
     isDrawLabel: boolean;
     isDrawLegend: boolean;
-    
+
 }
 
 export interface LineData {
@@ -20,6 +20,7 @@ export interface LineData {
     color: string;
     dataPoints: DataPoint[];
     isDrawLine: boolean;
+    isActiveAnimation: boolean;
 }
 
 export interface Tooltip {

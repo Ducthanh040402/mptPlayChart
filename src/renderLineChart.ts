@@ -28,6 +28,7 @@ export function renderLineChart(data: LineData[],
 
     const y = d3.scaleLinear()
         .range([height, 0])
+        // .domain([0, d3.max(data, d => d3.max(d.dataPoints, d => d.y))]);
         .domain([0, 800]);
 
     svg.datum({ x, y })
@@ -106,8 +107,11 @@ export function renderLineChart(data: LineData[],
 
 
     data[0].isDrawLine = false
+    data[1].isActiveAnimation = true
     var dataFiltered = []
     data.forEach((lineData, index) => {
+        var realspeed = 500; // ms
+        const pointColor = lineData.color;
         const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
         console.log(filteredData)
         if (!lineData.isDrawLine) {
@@ -126,14 +130,66 @@ export function renderLineChart(data: LineData[],
                 .attr("d", line);
         }
         else {
-            chartArea.selectAll(`.point-${index}`)
-                .data(filteredData)
-                .enter().append("circle")
-                .attr("class", `point-${index}`)
-                .attr("cx", d => x(d.x))
-                .attr("cy", d => y(d.y))
-                .attr("r", 4)
-                .attr("fill", lineData.color);
+            if (lineData.isActiveAnimation) {
+                chartArea.selectAll(`.point-${index}`)
+                    .data(filteredData)
+                    .enter().append("circle")
+                    .attr("class", `point-${index}`)
+                    .attr("cx", d => x(d.x))
+                    .attr("cy", d => y(d.y))
+                    .attr("r", 4)
+                    .attr("fill", lineData.color)
+                    .attr("cx", (d) => x(d.x))
+                    .attr("cy", (d) => y(d.y))
+                    .attr("r", 4)
+                    .style("fill", 4)
+                    .style("opacity", 0)
+                    .transition()
+                    .duration(1000)
+                    .style("opacity", 1)
+                    .delay((d, i) => i * realspeed)
+                    .transition()
+                    .duration(1000)
+                    .style("opacity", (d, i) => (i >= data.length - 10 ? 1 : 0.1))
+                    .style("fill", (d, i) =>
+                        i >= data.length - 10
+                            ? pointColor
+                            : "grey"
+                    )
+                    .delay((d, i) => realspeed)
+                    .transition()
+                    .duration(1000)
+                    .style("opacity", (d, i) => (i >= data.length - 10 ? 1 : 0.1))
+                    .style("fill", (d, i) =>
+                        i >= data.length - 10
+                            ? pointColor
+                            : "grey"
+                    )
+                    .delay((d, i) => realspeed)
+                    .transition()
+                    .duration((data.length - 1) * realspeed)
+                    .style("opacity", 1)
+                    .style("fill", (d, i) =>
+                        i >= data.length - 10
+                            ? pointColor
+                            : "grey"
+                    );
+            }
+            else {
+                chartArea.selectAll(`.point-${index}`)
+                    .data(filteredData)
+                    .enter().append("circle")
+                    .attr("class", `point-${index}`)
+                    .attr("cx", d => x(d.x))
+                    .attr("cy", d => y(d.y))
+                    .attr("r", 4)
+                    .attr("fill", lineData.color)
+                    .attr("cx", (d) => x(d.x))
+                    .attr("cy", (d) => y(d.y))
+                    .attr("r", 4)
+                    .style("fill", 4)
+                    .style("opacity", 1)
+            }
         }
     });
 

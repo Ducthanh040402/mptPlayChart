@@ -36,6 +36,7 @@ export class DataProcesser {
             name: seriesNames[index],
             color: this.getColorForSeries(categorical.values[index], index),
             isDrawLine: true,
+            isActiveAnimation: false,
             dataPoints: xValues.map((x, i) => ({
                 x: +x,
                 y: +ySeries[i],

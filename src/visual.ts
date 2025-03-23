@@ -45,6 +45,7 @@ type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 import { renderLineChart } from "./renderLineChart";
 import { MouseEventChart } from "./mouseEvent";
 import { DataPoint, LineData, defaultColors } from "./interface"
+import { Animation } from "./renderAnimationChart";
 import {
     BaseType,
     select as d3Select,
@@ -89,7 +90,8 @@ export class Visual implements IVisual {
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
         this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
         this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints);
-        
+        // var animation = new Animation(this.svg, this.lineDataPoints);
+        // animation.renderAnimationChart(2);
     }
 
 
