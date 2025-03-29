@@ -63,12 +63,14 @@ export class Visual implements IVisual {
     private svg: Selection<SVGSVGElement>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
     private mouseEvent: MouseEventChart;
-
+    private selectionManager: ISelectionManager;
     constructor(options: VisualConstructorOptions) {
         console.log('Visual constructor', options);
         this.formattingSettingsService = new FormattingSettingsService();
         this.target = options.element;
         this.host = options.host;
+        this.selectionManager = options.host.createSelectionManager();
+
         this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, options.element);
         this.svg = d3Select(this.target)
             .append("svg")
@@ -87,9 +89,10 @@ export class Visual implements IVisual {
             .attr("height", this.viewport.height);
         this.mouseEvent = new MouseEventChart(options, this.host);
 
+
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
         this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
-        this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints);
+        this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints, this.selectionManager);
         // var animation = new Animation(this.svg, this.lineDataPoints);
         // animation.renderAnimationChart(2);
     }

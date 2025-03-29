@@ -8,6 +8,8 @@ import { DataProcesser } from "./dataProcesser";
 import { DataPoint, LineData, defaultColors } from "./interface"
 import { renderLineChart } from "./renderLineChart";
 import { VisualFormattingSettingsModel } from "./settings";
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
+
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
 export class MouseEventChart {
@@ -16,12 +18,13 @@ export class MouseEventChart {
     private svg: d3.Selection<SVGSVGElement, any, any, any>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
 
+
     constructor(options: VisualUpdateOptions, host: powerbi.extensibility.visual.IVisualHost) {
         this.options = options;
         this.host = host;
     }
     public getTooltipData(closestPoint: any): powerbi.extensibility.VisualTooltipDataItem[] {
-        console.log("value tooltip", closestPoint.DataPoint.x)
+        // console.log("value tooltip", closestPoint.DataPoint.x)
         return [{
             displayName: closestPoint.key,
             value: `${closestPoint.DataPoint.y}`,
@@ -63,9 +66,9 @@ export class MouseEventChart {
                     }
                 });
             });
-            console.log("closestPoint", closestPoint)
+            // console.log("closestPoint", closestPoint)
             if (closestPoint !== null) {
-                console.log("data", closestPoint)
+                // console.log("data", closestPoint)
                 const cx = xScale(closestPoint.DataPoint.x);
                 const cy = yScale(closestPoint.DataPoint.y);
                 svg.selectAll("g.chart-area").append("line")
@@ -102,12 +105,74 @@ export class MouseEventChart {
 
     }
 
-    public mouseEventSelection(svg: any, data: LineData[]) {
+    public mouseEventSelection(svg: any, data: LineData[], selectionManager: ISelectionManager) {
         const self = this;
-        /**
-         * Add your mouse event code here
-         */
+        self.handleClickChart(svg, data, selectionManager);
+        self.handleClickUnselect(svg, data, selectionManager);
+
         return;
+    }
+
+    private handleClickChart(svg: any, data: LineData[], selectionManager: ISelectionManager) {
+        const self = this;
+        const lineChartRegion = svg.select("rect.tooltip-overlay");
+
+        lineChartRegion.on("click", (event: MouseEvent) => {
+            if (this.host.hostCapabilities.allowInteractions) {
+                const isCtrlPressed = event.ctrlKey || event.metaKey; 
+                console.log(isCtrlPressed)
+                const selectedData = self.getDataNearPointClick(svg, event, data);
+                if (!selectedData || !selectedData.DataPoint) return;
+
+                const selectionId = selectedData.DataPoint.selectionId;
+
+                selectionManager.select(selectionId, isCtrlPressed)
+                    .then(() => {
+                        console.log("Selection updated");
+                    })
+                    .catch(error => console.error("Selection error", error));
+
+                event.stopPropagation();
+            }
+        });
+    }
+
+    private handleClickUnselect(svg: any, data: LineData[], selectionManager: ISelectionManager) {
+        svg.on("click", () => {
+            if (this.host.hostCapabilities.allowInteractions) {
+                selectionManager
+                    .clear()
+                    .then(() => {
+                        console.log("unselected all");
+                    });
+            }
+        });
+    }
+    private getDataNearPointClick(svg: any, event: Event, linedata: LineData[]) {
+        const scaleX = svg._groups[0][0].__data__.x;
+        const scaleY = svg._groups[0][0].__data__.y;
+        let [mouseX, mouseY] = d3.pointer(event);
+        let mouseXValue = scaleX.invert(mouseX);
+        let closestPoint: {
+            DataPoint: DataPoint,
+            key,
+            color
+        } | null = null;
+        let minDistance = Infinity;
+        linedata.forEach(line => {
+            line.dataPoints.forEach(point => {
+                let distance = Math.abs(point.x - mouseXValue);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestPoint = {
+                        key: line.name,
+                        DataPoint: point,
+                        color: line.color
+                    };
+                };
+            });
+        });
+        return closestPoint
     }
 
 }
