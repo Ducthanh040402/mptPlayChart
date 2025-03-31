@@ -30,7 +30,12 @@ import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 
 import FormattingSettingsCard = formattingSettings.Card;
 import FormattingSettingsSlice = formattingSettings.Slice;
+import ColorPicker = formattingSettings.ColorPicker;
+import ToggleSwitch = formattingSettings.ToggleSwitch;
+
 import FormattingSettingsModel = formattingSettings.Model;
+import { Slice } from "powerbi-visuals-utils-formattingmodel/lib/FormattingSettingsComponents";
+import { LineData } from "./interface";
 
 /**
  * Data Point Formatting Card
@@ -71,6 +76,17 @@ class DataPointCardSettings extends FormattingSettingsCard {
     slices: Array<FormattingSettingsSlice> = [this.defaultColor, this.showAllDataPoints, this.fill, this.fillRule, this.fontSize];
 }
 
+class ColorSettingCard extends FormattingSettingsCard {
+    name: string = "colorSelector";
+    displayName: string = "Data Colors";
+    slices: Slice[] = [];
+}
+class LineOrPointSettingCard extends FormattingSettingsCard {
+    name: string = "linePointSelector";
+    displayName: string = "Line Or Points";
+    slices: Slice[] = [];
+}
+
 /**
 * visual settings model class
 *
@@ -78,6 +94,34 @@ class DataPointCardSettings extends FormattingSettingsCard {
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     // Create formatting settings model formatting cards
     dataPointCard = new DataPointCardSettings();
+    colorCard = new ColorSettingCard();
+    linePointCard = new LineOrPointSettingCard()
+    cards = [this.dataPointCard, this.colorCard, this.linePointCard];
 
-    cards = [this.dataPointCard];
+    pushColorSetting(dataPoints: LineData[]) {
+        const slices: Slice[] = this.colorCard.slices;
+        if (dataPoints) {
+            dataPoints.forEach(dataPoint => {
+                slices.push(new ColorPicker({
+                    name: "fillColor",
+                    displayName: dataPoint.name,
+                    value: { value: dataPoint.color },
+
+                }));
+            });
+        }
+    }
+    pushLinePointSetting(dataPoints: LineData[]) {
+        const slices: Slice[] = this.linePointCard.slices;
+        if (dataPoints) {
+            dataPoints.forEach(dataPoint => {
+                slices.push(new ToggleSwitch({
+                    name: "toggleLinePoint",
+                    displayName: dataPoint.name,
+                    value: true,
+
+                }));
+            });
+        }
+    }
 }

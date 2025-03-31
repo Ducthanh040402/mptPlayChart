@@ -82,6 +82,8 @@ export class Visual implements IVisual {
         this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews);
         this.data = new DataProcesser(options, this.host);
         this.lineDataPoints = this.data.processData();
+        this.formattingSettings.pushColorSetting(this.lineDataPoints);
+        this.formattingSettings.pushLinePointSetting(this.lineDataPoints);
         this.viewport = options.viewport
         console.log("dataUse", this.lineDataPoints)
         this.svg
@@ -93,6 +95,8 @@ export class Visual implements IVisual {
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
         this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
         this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints, this.selectionManager);
+
+
         // var animation = new Animation(this.svg, this.lineDataPoints);
         // animation.renderAnimationChart(2);
     }
