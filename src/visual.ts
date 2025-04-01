@@ -31,6 +31,8 @@ import "./../style/visual.less";
 import { createTooltipServiceWrapper, ITooltipServiceWrapper, TooltipEnabledDataPoint } from "powerbi-visuals-utils-tooltiputils";
 import { pointer } from "d3";
 import { scaleBand, scaleLinear, ScaleLinear, ScaleBand } from "d3-scale";
+import { dataViewObjects} from "powerbi-visuals-utils-dataviewutils";
+import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -38,6 +40,10 @@ import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import FormattingModel = powerbi.visuals.FormattingModel;
+import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColorPalette;
+import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
+import Fill = powerbi.Fill;
+
 import { VisualFormattingSettingsModel } from "./settings";
 import * as d3 from "d3";
 import { DataProcesser } from "./dataProcesser";
@@ -79,8 +85,13 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
-        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews);
+        console.log(options.dataViews?.[0])
+
+        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel,  options.dataViews?.[0]);
         this.data = new DataProcesser(options, this.host);
+        const colorPalette: ISandboxExtendedColorPalette = this.host.colorPalette;
+
+        console.log(dataViewObjects)
         this.lineDataPoints = this.data.processData();
         this.formattingSettings.pushColorSetting(this.lineDataPoints);
         this.formattingSettings.pushLinePointSetting(this.lineDataPoints);
@@ -110,5 +121,6 @@ export class Visual implements IVisual {
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }
+
 
 }

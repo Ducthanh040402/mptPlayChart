@@ -21,6 +21,8 @@ export interface LineData {
     dataPoints: DataPoint[];
     isDrawLine: boolean;
     isActiveAnimation: boolean;
+    format?: string;
+
 }
 
 export interface Tooltip {

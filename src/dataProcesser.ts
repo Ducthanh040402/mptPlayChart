@@ -3,8 +3,13 @@ import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructor
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
-import { range } from "d3";
+import { format, range } from "d3";
 import { DataPoint, LineData, defaultColors } from "./interface"
+import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
+import Fill = powerbi.Fill;
+import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
+import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColorPalette;
+import { dataViewObjects } from "powerbi-visuals-utils-dataviewutils";
 
 
 export class DataProcesser {
@@ -27,16 +32,20 @@ export class DataProcesser {
         }
         const dataView = this.options.dataViews[0];
         const categorical = dataView.categorical;
-
+        const colorPalette: ISandboxExtendedColorPalette = this.host.colorPalette;
+        const dataViewOB = dataViewObjects;
+        const color: string = getColumnColorByIndex(categorical.categories[0], 0, colorPalette)
         var xValues = categorical.categories[0].values;
         var yValues = categorical.values.map(element => element.values);
         var seriesNames = categorical.values.map(element => element.source.displayName);
 
         var alldata: LineData[] = yValues.map((ySeries, index) => ({
             name: seriesNames[index],
-            color: this.getColorForSeries(categorical.values[index], index),
+            color: getColumnColorByIndex(categorical.categories[0], index, colorPalette),
             isDrawLine: true,
             isActiveAnimation: false,
+            format: ySeries.objects ? <string>ySeries.objects[index].general.formatString : null,
+
             dataPoints: xValues.map((x, i) => ({
                 x: +x,
                 y: +ySeries[i],
@@ -51,3 +60,28 @@ export class DataProcesser {
 
 }
 
+function getColumnColorByIndex(
+    category: DataViewCategoryColumn,
+    index: number,
+    colorPalette: ISandboxExtendedColorPalette,
+): string {
+    if (colorPalette.isHighContrast) {
+        return colorPalette.background.value;
+    }
+
+    const defaultColor: Fill = {
+        solid: {
+            color: colorPalette.getColor(`${category.values[index]}`).value,
+        }
+    };
+    const prop: DataViewObjectPropertyIdentifier = {
+        objectName: "colorSelector",
+        propertyName: "fillColor"
+    };
+    let colorFromObjects: Fill;
+    if (category.objects?.[index]) {
+        colorFromObjects = dataViewObjects.getValue(category?.objects[index], prop);
+    }
+
+    return colorFromObjects?.solid.color ?? defaultColor.solid.color;
+}
