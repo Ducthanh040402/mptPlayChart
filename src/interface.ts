@@ -2,6 +2,7 @@ export interface DataPoint {
     x: number;
     y: number;
     selectionId: powerbi.visuals.ISelectionId;
+    color: string;
 }
 export interface SettingsPanel {
     color: string;
@@ -21,7 +22,7 @@ export interface LineData {
     dataPoints: DataPoint[];
     isDrawLine: boolean;
     isActiveAnimation: boolean;
-    format?: string;
+    format: string;
 
 }
 

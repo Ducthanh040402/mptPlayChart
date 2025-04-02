@@ -31,7 +31,7 @@ import "./../style/visual.less";
 import { createTooltipServiceWrapper, ITooltipServiceWrapper, TooltipEnabledDataPoint } from "powerbi-visuals-utils-tooltiputils";
 import { pointer } from "d3";
 import { scaleBand, scaleLinear, ScaleLinear, ScaleBand } from "d3-scale";
-import { dataViewObjects} from "powerbi-visuals-utils-dataviewutils";
+import { dataViewObjects } from "powerbi-visuals-utils-dataviewutils";
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
@@ -85,31 +85,26 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
-        console.log(options.dataViews?.[0])
-
-        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel,  options.dataViews?.[0]);
+        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews?.[0]);
+        //processData
         this.data = new DataProcesser(options, this.host);
-        const colorPalette: ISandboxExtendedColorPalette = this.host.colorPalette;
-
-        console.log(dataViewObjects)
         this.lineDataPoints = this.data.processData();
+        //settings panel
         this.formattingSettings.pushColorSetting(this.lineDataPoints);
         this.formattingSettings.pushLinePointSetting(this.lineDataPoints);
+        this.formattingSettings.pushActiveAnimation(this.lineDataPoints)
         this.viewport = options.viewport
+        
         console.log("dataUse", this.lineDataPoints)
         this.svg
             .attr("width", this.viewport.width)
             .attr("height", this.viewport.height);
         this.mouseEvent = new MouseEventChart(options, this.host);
 
-
         this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
         this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
         this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints, this.selectionManager);
 
-
-        // var animation = new Animation(this.svg, this.lineDataPoints);
-        // animation.renderAnimationChart(2);
     }
 
 

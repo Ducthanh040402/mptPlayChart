@@ -10,6 +10,7 @@ import Fill = powerbi.Fill;
 import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
 import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColorPalette;
 import { dataViewObjects } from "powerbi-visuals-utils-dataviewutils";
+type DataViewObjects = { [name: string]: any };
 
 
 export class DataProcesser {
@@ -34,23 +35,22 @@ export class DataProcesser {
         const categorical = dataView.categorical;
         const colorPalette: ISandboxExtendedColorPalette = this.host.colorPalette;
         const dataViewOB = dataViewObjects;
-        const color: string = getColumnColorByIndex(categorical.categories[0], 0, colorPalette)
         var xValues = categorical.categories[0].values;
         var yValues = categorical.values.map(element => element.values);
         var seriesNames = categorical.values.map(element => element.source.displayName);
 
         var alldata: LineData[] = yValues.map((ySeries, index) => ({
             name: seriesNames[index],
-            color: getColumnColorByIndex(categorical.categories[0], index, colorPalette),
-            isDrawLine: true,
-            isActiveAnimation: false,
+            color: getColumnColorByIndex(categorical.categories[0], dataView.metadata, index, colorPalette),
+            isDrawLine: getBoolenValueToDrawLineOrPoint(dataView.metadata, index),
+            isActiveAnimation: activeAnimation(dataView.metadata, index),
             format: ySeries.objects ? <string>ySeries.objects[index].general.formatString : null,
 
             dataPoints: xValues.map((x, i) => ({
                 x: +x,
                 y: +ySeries[i],
                 selectionId: this.host.createSelectionIdBuilder().withCategory(categorical.categories[0], i).createSelectionId(),
-            })).sort((a, b) => a.x - b.x).filter(d => d.y !== 0) // sort by x value if not already sorted           
+            })).sort((a, b) => a.x - b.x).filter(d => d.y !== 0) //sort the value index        
         }));
 
         this.data = alldata;
@@ -62,6 +62,7 @@ export class DataProcesser {
 
 function getColumnColorByIndex(
     category: DataViewCategoryColumn,
+    metadata: DataViewCategoryColumn,
     index: number,
     colorPalette: ISandboxExtendedColorPalette,
 ): string {
@@ -76,12 +77,46 @@ function getColumnColorByIndex(
     };
     const prop: DataViewObjectPropertyIdentifier = {
         objectName: "colorSelector",
-        propertyName: "fillColor"
+        propertyName: `fillColor${index}`
     };
     let colorFromObjects: Fill;
-    if (category.objects?.[index]) {
-        colorFromObjects = dataViewObjects.getValue(category?.objects[index], prop);
+    if (metadata.objects) {
+        const objects: DataViewObjects = metadata.objects;
+        colorFromObjects = dataViewObjects.getValue(objects, prop, colorFromObjects);
+    }
+    return colorFromObjects?.solid.color ?? defaultColor.solid.color;
+}
+
+function getBoolenValueToDrawLineOrPoint(
+    metadata: DataViewCategoryColumn,
+    index: number,
+): boolean {
+
+    const prop: DataViewObjectPropertyIdentifier = {
+        objectName: "linePointSelector",
+        propertyName: `toggleLinePoint${index}`
+    };
+    let isDrawLine: boolean = true;
+    if (metadata.objects) {
+        const object: DataViewObjects = metadata.objects;
+        isDrawLine = dataViewObjects.getValue(object, prop, isDrawLine);
     }
 
-    return colorFromObjects?.solid.color ?? defaultColor.solid.color;
+    return isDrawLine;
+}
+
+function activeAnimation(
+    metadata: DataViewCategoryColumn,
+    index: number,
+): boolean {
+    const prop: DataViewObjectPropertyIdentifier = {
+        objectName: "activeAnimation",
+        propertyName: `line${index}`
+    };
+    let isActiveAnimation: boolean = false;
+    if (metadata.objects) {
+        const object: DataViewObjects = metadata.objects;
+        isActiveAnimation = dataViewObjects.getValue(object, prop, isActiveAnimation);
+    }
+    return isActiveAnimation;
 }

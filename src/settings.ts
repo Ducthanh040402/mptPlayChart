@@ -55,6 +55,12 @@ class LineOrPointSettingCard extends Card {
     displayName: string = "Line Or Points";
     slices: Slice[] = [];
 }
+class ActiveAnimation extends Card{
+    name:string="activeAnimation";
+    displayName?: string= "Active Animation";
+    slices: Slice[] = [];
+    
+}
 
 /**
 * visual settings model class
@@ -65,15 +71,15 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     // dataPointCard = new DataPointCardSettings();
     colorCard = new ColorSettingCard();
     linePointCard = new LineOrPointSettingCard()
-    cards = [this.colorCard, this.linePointCard];
-
+    animation = new ActiveAnimation();
+    cards = [this.colorCard, this.linePointCard,this.animation];
+    
     pushColorSetting(dataPoints: LineData[]) {
         const slices: Slice[] = this.colorCard.slices;
         if (dataPoints) {
             dataPoints.forEach((dataPoint,index) => {
-                // console.log("index",dataPoint.dataPoints[index].selectionId.getSelector())
                 slices.push(new ColorPicker({
-                    name: "fillColor",
+                    name: `fillColor${index}`,
                     displayName: dataPoint.name,
                     value: { value: dataPoint.color },
                     // selector:dataPoint.dataPoints[index].selectionId.getSelector()
@@ -85,11 +91,26 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     pushLinePointSetting(dataPoints: LineData[]) {
         const slices: Slice[] = this.linePointCard.slices;
         if (dataPoints) {
-            dataPoints.forEach(dataPoint => {
+            dataPoints.forEach((dataPoint,index) => {
                 slices.push(new ToggleSwitch({
-                    name: "toggleLinePoint",
+                    name: `toggleLinePoint${index}`,
                     displayName: dataPoint.name,
-                    value: true,
+                    value: dataPoint.isDrawLine,
+                    // selector: dataPoint.dataPoints[0].selectionId.getSelector(),
+
+                }));
+            });
+        }
+    }
+    pushActiveAnimation(dataPoints: LineData[]) {
+        const slices: Slice[] = this.animation.slices;
+        if (dataPoints) {
+            dataPoints.forEach((dataPoint,index) => {
+                slices.push(new ToggleSwitch({
+                    name: `line${index}`,
+                    displayName: dataPoint.name,
+                    value: dataPoint.isActiveAnimation,
+                    // selector: dataPoint.dataPoints[0].selectionId.getSelector(),
 
                 }));
             });

@@ -19,7 +19,34 @@
     "objects": {
         "colorSelector": {
             "properties": {
-                "fillColor": {
+                "fillColor0": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fillColor1": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fillColor2": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fillColor3": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -31,7 +58,52 @@
             }
         },
         "linePointSelector": {
-            "properties": {}
+            "properties": {
+                "toggleLinePoint0":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "toggleLinePoint1":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "toggleLinePoint2":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "toggleLinePoint3":{
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "activeAnimation": {
+            "properties": {
+                "line0":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "line1":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "line2":{
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "line3":{
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
         }
     },
     "dataViewMappings": [
@@ -75,6 +147,11 @@
         ],
         "supportEnhancedTooltips": true
         
+    },
+    "drilldown": {
+        "roles": [
+            "category"
+        ]
     },
     "privileges": []
 }

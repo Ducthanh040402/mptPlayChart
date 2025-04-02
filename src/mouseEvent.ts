@@ -33,6 +33,7 @@ export class MouseEventChart {
         }]
 
     }
+    
     public mouseEventTooltip(svg: any, data: LineData[], tooltipServiceWrapper: ITooltipServiceWrapper) {
         const self = this;
         svg.select("rect.tooltip-overlay").on("mousemove", function (event) {
@@ -76,7 +77,7 @@ export class MouseEventChart {
                     .attr("x1", cx)
                     .attr("x2", cx)
                     .attr("y1", 0)
-                    .attr("y2", rectHeight)
+                    .attr("y2", rectHeight - 6)
                     .attr("stroke", "#000000")
                     .attr("stroke-width", 1)
                     .style("opacity", 1);
@@ -119,7 +120,7 @@ export class MouseEventChart {
 
         lineChartRegion.on("click", (event: MouseEvent) => {
             if (this.host.hostCapabilities.allowInteractions) {
-                const isCtrlPressed = event.ctrlKey || event.metaKey; 
+                const isCtrlPressed = event.ctrlKey || event.metaKey;
                 console.log(isCtrlPressed)
                 const selectedData = self.getDataNearPointClick(svg, event, data);
                 if (!selectedData || !selectedData.DataPoint) return;
@@ -148,6 +149,7 @@ export class MouseEventChart {
             }
         });
     }
+
     private getDataNearPointClick(svg: any, event: Event, linedata: LineData[]) {
         const scaleX = svg._groups[0][0].__data__.x;
         const scaleY = svg._groups[0][0].__data__.y;

@@ -106,15 +106,15 @@ export function renderLineChart(data: LineData[],
     // .attr("transform", `translate(${margin.left}, ${margin.top })`);
 
 
-    data[0].isDrawLine = false
-    data[1].isActiveAnimation = true
+
+    // data[1].isActiveAnimation = true
     var dataFiltered = []
     data.forEach((lineData, index) => {
         var realspeed = 500; // ms
         const pointColor = lineData.color;
         const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
         console.log(filteredData)
-        if (!lineData.isDrawLine) {
+        if (lineData.isDrawLine) {
             const line = d3.line<DataPoint>()
                 .x(d => x(d.x))
                 .y(d => Math.min(y(d.y), height)); // Limit height
