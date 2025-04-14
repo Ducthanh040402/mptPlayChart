@@ -23,7 +23,7 @@ export interface LineData {
     isDrawLine: boolean;
     isActiveAnimation: boolean;
     format: string;
-
+    selectionId: powerbi.visuals.ISelectionId;
 }
 
 export interface Tooltip {

@@ -19,34 +19,7 @@
     "objects": {
         "colorSelector": {
             "properties": {
-                "fillColor0": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "fillColor1": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "fillColor2": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
-                "fillColor3": {
+                "fillColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -59,22 +32,7 @@
         },
         "linePointSelector": {
             "properties": {
-                "toggleLinePoint0":{
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "toggleLinePoint1":{
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "toggleLinePoint2":{
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "toggleLinePoint3":{
+                "toggleLinePoint": {
                     "type": {
                         "bool": true
                     }
@@ -83,22 +41,7 @@
         },
         "activeAnimation": {
             "properties": {
-                "line0":{
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "line1":{
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "line2":{
-                    "type": {
-                        "bool": true
-                    }
-                },
-                "line3":{
+                "line": {
                     "type": {
                         "bool": true
                     }
@@ -136,7 +79,6 @@
             }
         }
     ],
-    
     "tooltips": {
         "supportedTypes": {
             "default": true,
@@ -146,7 +88,6 @@
             "Tooltips"
         ],
         "supportEnhancedTooltips": true
-        
     },
     "drilldown": {
         "roles": [

@@ -38,10 +38,12 @@ export class DataProcesser {
         var xValues = categorical.categories[0].values;
         var yValues = categorical.values.map(element => element.values);
         var seriesNames = categorical.values.map(element => element.source.displayName);
+        var color_change = getColumnColorByIndex(categorical.categories[0], dataView.metadata, 0, colorPalette)
 
+        debugger
         var alldata: LineData[] = yValues.map((ySeries, index) => ({
             name: seriesNames[index],
-            color: getColumnColorByIndex(categorical.categories[0], dataView.metadata, index, colorPalette),
+            color: getColumnColorByIndex(categorical.categories[0], categorical.values[index], index, colorPalette),
             isDrawLine: getBoolenValueToDrawLineOrPoint(dataView.metadata, index),
             isActiveAnimation: activeAnimation(dataView.metadata, index),
             format: ySeries.objects ? <string>ySeries.objects[index].general.formatString : null,
@@ -49,12 +51,18 @@ export class DataProcesser {
             dataPoints: xValues.map((x, i) => ({
                 x: +x,
                 y: +ySeries[i],
-                selectionId: this.host.createSelectionIdBuilder().withCategory(categorical.categories[0], i).createSelectionId(),
-            })).sort((a, b) => a.x - b.x).filter(d => d.y !== 0) //sort the value index        
+                selectionId: this.host.createSelectionIdBuilder()
+                    .withCategory(categorical.categories[0], i)
+                    .createSelectionId(),
+            })).sort((a, b) => a.x - b.x).filter(d => d.y !== 0),
+
+            selectionId: this.host.createSelectionIdBuilder()
+                .withMeasure(categorical.values[index].source.queryName)
+                .createSelectionId()
         }));
 
         this.data = alldata;
-        console.log(this.data)
+        console.log("dataProcesser----", this.data)
         return this.data;
     }
 
@@ -75,15 +83,18 @@ function getColumnColorByIndex(
             color: colorPalette.getColor(`${category.values[index]}`).value,
         }
     };
+
     const prop: DataViewObjectPropertyIdentifier = {
         objectName: "colorSelector",
-        propertyName: `fillColor${index}`
+        propertyName: "fillColor"
     };
+
     let colorFromObjects: Fill;
     if (metadata.objects) {
-        const objects: DataViewObjects = metadata.objects;
-        colorFromObjects = dataViewObjects.getValue(objects, prop, colorFromObjects);
+        const objects = metadata.objects as DataViewObjects;
+        colorFromObjects = dataViewObjects.getValue<Fill>(objects, prop);
     }
+
     return colorFromObjects?.solid.color ?? defaultColor.solid.color;
 }
 
