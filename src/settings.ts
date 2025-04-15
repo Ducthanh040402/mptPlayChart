@@ -101,6 +101,7 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
                     displayName: dataPoint.name,
                     value: dataPoint.isDrawLine,
                     // selector: dataPoint.dataPoints[0].selectionId.getSelector()
+                    selector: dataPoint.selectionId.getSelector()
                 }));
             });
         }
@@ -113,7 +114,8 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
                     name: "line",
                     displayName: dataPoint.name,
                     value: dataPoint.isActiveAnimation,
-                    selector: dataPoint.dataPoints[0].selectionId.getSelector()
+                    selector: dataPoint.selectionId.getSelector()
+
                 }));
             });
         }

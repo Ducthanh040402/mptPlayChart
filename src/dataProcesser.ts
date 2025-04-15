@@ -90,8 +90,8 @@ function getColumnColorByIndex(
     };
 
     let colorFromObjects: Fill;
-    if (metadata.columns[index+1].objects) {
-        const objects = metadata.columns[index+1].objects as DataViewObjects;
+    if (metadata.columns[index + 1].objects) {
+        const objects = metadata.columns[index + 1].objects as DataViewObjects;
         colorFromObjects = dataViewObjects.getValue<Fill>(objects, prop);
     }
 
@@ -99,17 +99,17 @@ function getColumnColorByIndex(
 }
 
 function getBoolenValueToDrawLineOrPoint(
-    metadata: DataViewCategoryColumn,
+    metadata: any,
     index: number,
 ): boolean {
 
     const prop: DataViewObjectPropertyIdentifier = {
         objectName: "linePointSelector",
-        propertyName: `toggleLinePoint${index}`
+        propertyName: `toggleLinePoint`
     };
     let isDrawLine: boolean = true;
-    if (metadata.objects) {
-        const object: DataViewObjects = metadata.objects;
+    if (metadata.columns[index + 1].objects) {
+        const object: DataViewObjects = metadata.columns[index + 1].objects;
         isDrawLine = dataViewObjects.getValue(object, prop, isDrawLine);
     }
 
@@ -117,16 +117,16 @@ function getBoolenValueToDrawLineOrPoint(
 }
 
 function activeAnimation(
-    metadata: DataViewCategoryColumn,
+    metadata: any,
     index: number,
 ): boolean {
     const prop: DataViewObjectPropertyIdentifier = {
         objectName: "activeAnimation",
-        propertyName: `line${index}`
+        propertyName: `line`
     };
     let isActiveAnimation: boolean = false;
-    if (metadata.objects) {
-        const object: DataViewObjects = metadata.objects;
+    if (metadata.columns[index + 1].objects) {
+        const object: DataViewObjects = metadata.columns[index + 1].objects;
         isActiveAnimation = dataViewObjects.getValue(object, prop, isActiveAnimation);
     }
     return isActiveAnimation;
