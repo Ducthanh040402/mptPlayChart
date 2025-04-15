@@ -38,12 +38,12 @@ export class DataProcesser {
         var xValues = categorical.categories[0].values;
         var yValues = categorical.values.map(element => element.values);
         var seriesNames = categorical.values.map(element => element.source.displayName);
-        var color_change = getColumnColorByIndex(categorical.categories[0], dataView.metadata, 0, colorPalette)
+
 
         debugger
         var alldata: LineData[] = yValues.map((ySeries, index) => ({
             name: seriesNames[index],
-            color: getColumnColorByIndex(categorical.categories[0], categorical.values[index], index, colorPalette),
+            color: getColumnColorByIndex(categorical.categories[0], dataView.metadata, index, colorPalette),
             isDrawLine: getBoolenValueToDrawLineOrPoint(dataView.metadata, index),
             isActiveAnimation: activeAnimation(dataView.metadata, index),
             format: ySeries.objects ? <string>ySeries.objects[index].general.formatString : null,
@@ -70,7 +70,7 @@ export class DataProcesser {
 
 function getColumnColorByIndex(
     category: DataViewCategoryColumn,
-    metadata: DataViewCategoryColumn,
+    metadata: any,
     index: number,
     colorPalette: ISandboxExtendedColorPalette,
 ): string {
@@ -90,8 +90,8 @@ function getColumnColorByIndex(
     };
 
     let colorFromObjects: Fill;
-    if (metadata.objects) {
-        const objects = metadata.objects as DataViewObjects;
+    if (metadata.columns[index+1].objects) {
+        const objects = metadata.columns[index+1].objects as DataViewObjects;
         colorFromObjects = dataViewObjects.getValue<Fill>(objects, prop);
     }
 
