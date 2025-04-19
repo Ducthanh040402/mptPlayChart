@@ -47,6 +47,58 @@
                     }
                 }
             }
+        },
+        "axisRange": {
+            "displayName": "Axis Range",
+            "properties": {
+                "xMin": {
+                    "displayName": "X Min",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "xMax": {
+                    "displayName": "X Max",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "yMin": {
+                    "displayName": "Y Min",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "yMax": {
+                    "displayName": "Y Max",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "autoRange": {
+                    "displayName": "Auto Range",
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "axisLabels": {
+            "displayName": "Axis Labels",
+            "properties": {
+                "xAxisLabel": {
+                    "displayName": "X Axis Label",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "yAxisLabel": {
+                    "displayName": "Y Axis Label",
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
         }
     },
     "dataViewMappings": [

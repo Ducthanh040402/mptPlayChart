@@ -94,14 +94,14 @@ export class Visual implements IVisual {
         this.formattingSettings.pushLinePointSetting(this.lineDataPoints);
         this.formattingSettings.pushActiveAnimation(this.lineDataPoints)
         this.viewport = options.viewport
-        
+
         console.log("dataUse", this.lineDataPoints)
         this.svg
             .attr("width", this.viewport.width)
             .attr("height", this.viewport.height);
         this.mouseEvent = new MouseEventChart(options, this.host);
 
-        this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
+        this.svg = renderLineChart(this.lineDataPoints, options, this.viewport, this.svg, this.formattingSettings);
         this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
         this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints, this.selectionManager);
 

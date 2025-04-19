@@ -35,6 +35,7 @@ import Card = formattingSettings.SimpleCard;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import ColorPicker = formattingSettings.ColorPicker;
 import ToggleSwitch = formattingSettings.ToggleSwitch;
+import NumUpDown = formattingSettings.NumUpDown;
 
 import FormattingSettingsModel = formattingSettings.Model;
 import { Slice } from "powerbi-visuals-utils-formattingmodel/lib/FormattingSettingsComponents";
@@ -62,6 +63,94 @@ class ActiveAnimation extends Card {
 
 }
 
+class AxisRangeCard extends Card {
+    name: string = "axisRange";
+    displayName: string = "Axis Range";
+
+    autoRange = new ToggleSwitch({
+        name: "autoRange",
+        displayName: "Auto Range",
+        value: true
+    });
+
+    xMin = new NumUpDown({
+        name: "xMin",
+        displayName: "X Min (Auto)",
+        value: 0
+    });
+
+    xMax = new NumUpDown({
+        name: "xMax",
+        displayName: "X Max (Auto)",
+        value: 0
+    });
+
+    yMin = new NumUpDown({
+        name: "yMin",
+        displayName: "Y Min (Auto)",
+        value: 0
+    });
+
+    yMax = new NumUpDown({
+        name: "yMax",
+        displayName: "Y Max (Auto)",
+        value: 0
+    });
+
+    slices: Slice[] = [this.autoRange, this.xMin, this.xMax, this.yMin, this.yMax];
+
+    updateDefaultRange(xMin: number, xMax: number, yMin: number, yMax: number) {
+        if (this.xMin.value === 0) {
+            this.xMin.value = xMin;
+            this.xMin.displayName = "X Min (Auto)";
+        } else {
+            this.xMin.displayName = "X Min";
+        }
+
+        if (this.xMax.value === 0) {
+            this.xMax.value = xMax;
+            this.xMax.displayName = "X Max (Auto)";
+        } else {
+            this.xMax.displayName = "X Max";
+        }
+
+        if (this.yMin.value === 0) {
+            this.yMin.value = yMin;
+            this.yMin.displayName = "Y Min (Auto)";
+        } else {
+            this.yMin.displayName = "Y Min";
+        }
+
+        if (this.yMax.value === 0) {
+            this.yMax.value = yMax;
+            this.yMax.displayName = "Y Max (Auto)";
+        } else {
+            this.yMax.displayName = "Y Max";
+        }
+    }
+}
+
+class AxisLabelsCard extends Card {
+    name: string = "axisLabels";
+    displayName: string = "Axis Labels";
+
+    xAxisLabel = new formattingSettings.TextInput({
+        name: "xAxisLabel",
+        displayName: "X Axis Label",
+        value: "X Axis",
+        placeholder: "Enter X axis label"
+    });
+
+    yAxisLabel = new formattingSettings.TextInput({
+        name: "yAxisLabel",
+        displayName: "Y Axis Label",
+        value: "Y Axis",
+        placeholder: "Enter Y axis label"
+    });
+
+    slices: Slice[] = [this.xAxisLabel, this.yAxisLabel];
+}
+
 /**
 * visual settings model class
 *
@@ -72,7 +161,9 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     colorCard = new ColorSettingCard();
     linePointCard = new LineOrPointSettingCard()
     animation = new ActiveAnimation();
-    cards = [this.colorCard, this.linePointCard, this.animation];
+    axisRange = new AxisRangeCard();
+    axisLabels = new AxisLabelsCard();
+    cards = [this.colorCard, this.linePointCard, this.animation, this.axisRange, this.axisLabels];
 
     pushColorSetting(dataPoints: LineData[]) {
         const slices: Slice[] = this.colorCard.slices;
