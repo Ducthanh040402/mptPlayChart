@@ -35,7 +35,6 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
             return numValue.toString();
         }
     };
-    
 
     const xAxisTitle = options.dataViews?.[0].metadata.columns[0].displayName.toString();
     const yAxisTitle = data.map(d => d.name).join(" & ");
@@ -182,11 +181,11 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         var realspeed = 500; // ms
         const pointColor = lineData.color;
         const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
-        console.log(filteredData)
+
         if (lineData.isDrawLine) {
             const line = d3.line<DataPoint>()
                 .x(d => x(d.x))
-                .y(d => Math.min(y(d.y), height)); // Limit height
+                .y(d => Math.min(y(d.y), height));
 
             chartArea.append("path")
                 .datum(filteredData)
@@ -197,9 +196,70 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                 .attr("stroke-linecap", "round")
                 .attr("stroke-width", 2.5)
                 .attr("d", line);
+        } else {
+            // Hiển thị tất cả điểm tĩnh ban đầu
+            chartArea.selectAll(`.point-${index}`)
+                .data(filteredData)
+                .enter().append("circle")
+                .attr("class", `point-${index}`)
+                .attr("cx", d => x(d.x))
+                .attr("cy", d => y(d.y))
+                .attr("r", 4)
+                .attr("fill", lineData.color)
+                .style("opacity", 1);
         }
-        else {
+    });
+
+    // Add reset button after chart-area
+    const buttonContainer = svg.append("g")
+        .attr("class", "button-container")
+        .raise();
+
+    // Reset button
+    const resetGroup = buttonContainer.append("g")
+        .attr("class", "reset-button")
+        .attr("transform", `translate(${margin.left + width - 35}, ${margin.top - 20})`)
+        .style("pointer-events", "all");
+
+    const resetButton = resetGroup.append("rect")
+        .attr("width", 30)
+        .attr("height", 30)
+        .attr("rx", 4)
+        .attr("fill", "#f0f0f0")
+        .attr("stroke", "#ccc")
+        .style("cursor", "pointer");
+
+    // Reset icon using the provided SVG
+    const resetIcon = resetGroup.append("g")
+        .attr("transform", "translate(5, 5)")
+        .style("pointer-events", "none");
+
+    resetIcon.append("svg")
+        .attr("width", 20)
+        .attr("height", 20)
+        .attr("viewBox", "0 0 21 21")
+        .append("g")
+        .attr("fill", "none")
+        .attr("stroke", "#666")
+        .attr("stroke-width", 2)
+        .attr("stroke-linecap", "round")
+        .attr("stroke-linejoin", "round")
+        .attr("transform", "matrix(0 1 1 0 2.5 2.5)")
+        .html(`
+            <path d="m3.98652376 1.07807068c-2.38377179 1.38514556-3.98652376 3.96636605-3.98652376 6.92192932 0 4.418278 3.581722 8 8 8s8-3.581722 8-8-3.581722-8-8-8"/>
+            <path d="m4 1v4h-4" transform="matrix(1 0 0 -1 0 6)"/>
+        `);
+
+    // Reset click handler
+    resetGroup.on("click", () => {
+        // Reset all animations
+        data.forEach((lineData, index) => {
             if (lineData.isActiveAnimation) {
+                // Remove existing points
+                chartArea.selectAll(`.point-${index}`).remove();
+
+                // Redraw points with initial animation
+                const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
                 chartArea.selectAll(`.point-${index}`)
                     .data(filteredData)
                     .enter().append("circle")
@@ -208,58 +268,13 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                     .attr("cy", d => y(d.y))
                     .attr("r", 4)
                     .attr("fill", lineData.color)
-                    .attr("cx", (d) => x(d.x))
-                    .attr("cy", (d) => y(d.y))
-                    .attr("r", 4)
-                    .style("fill", 4)
                     .style("opacity", 0)
                     .transition()
                     .duration(1000)
                     .style("opacity", 1)
-                    .delay((d, i) => i * realspeed)
-                    .transition()
-                    .duration(1000)
-                    .style("opacity", (d, i) => (i >= data.length - 10 ? 1 : 0.1))
-                    .style("fill", (d, i) =>
-                        i >= data.length - 10
-                            ? pointColor
-                            : "grey"
-                    )
-                    .delay((d, i) => realspeed)
-                    .transition()
-                    .duration(1000)
-                    .style("opacity", (d, i) => (i >= data.length - 10 ? 1 : 0.1))
-                    .style("fill", (d, i) =>
-                        i >= data.length - 10
-                            ? pointColor
-                            : "grey"
-                    )
-                    .delay((d, i) => realspeed)
-                    .transition()
-                    .duration((data.length - 1) * realspeed)
-                    .style("opacity", 1)
-                    .style("fill", (d, i) =>
-                        i >= data.length - 10
-                            ? pointColor
-                            : "grey"
-                    );
+                    .delay((d, i) => i * 500);
             }
-            else {
-                chartArea.selectAll(`.point-${index}`)
-                    .data(filteredData)
-                    .enter().append("circle")
-                    .attr("class", `point-${index}`)
-                    .attr("cx", d => x(d.x))
-                    .attr("cy", d => y(d.y))
-                    .attr("r", 4)
-                    .attr("fill", lineData.color)
-                    .attr("cx", (d) => x(d.x))
-                    .attr("cy", (d) => y(d.y))
-                    .attr("r", 4)
-                    .style("fill", 4)
-                    .style("opacity", 1)
-            }
-        }
+        });
     });
 
     return svg;
