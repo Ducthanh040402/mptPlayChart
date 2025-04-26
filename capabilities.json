@@ -9,12 +9,17 @@
             "displayName": "Measure Data",
             "name": "measure",
             "kind": "Measure"
+        },
+        {
+            "displayName": "Tooltips",
+            "name": "Tooltips",
+            "kind": "Measure"
         }
     ],
     "objects": {
-        "dataPoint": {
+        "colorSelector": {
             "properties": {
-                "defaultColor": {
+                "fillColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -22,31 +27,75 @@
                             }
                         }
                     }
-                },
-                "showAllDataPoints": {
+                }
+            }
+        },
+        "linePointSelector": {
+            "properties": {
+                "toggleLinePoint": {
                     "type": {
                         "bool": true
                     }
-                },
-                "fill": {
+                }
+            }
+        },
+        "activeAnimation": {
+            "properties": {
+                "line": {
                     "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "axisRange": {
+            "displayName": "Axis Range",
+            "properties": {
+                "xMin": {
+                    "displayName": "X Min",
+                    "type": {
+                        "numeric": true
                     }
                 },
-                "fillRule": {
+                "xMax": {
+                    "displayName": "X Max",
                     "type": {
-                        "fill": {}
+                        "numeric": true
                     }
                 },
-                "fontSize": {
+                "yMin": {
+                    "displayName": "Y Min",
                     "type": {
-                        "formatting": {
-                            "fontSize": true
-                        }
+                        "numeric": true
+                    }
+                },
+                "yMax": {
+                    "displayName": "Y Max",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "autoRange": {
+                    "displayName": "Auto Range",
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "axisLabels": {
+            "displayName": "Axis Labels",
+            "properties": {
+                "xAxisLabel": {
+                    "displayName": "X Axis Label",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "yAxisLabel": {
+                    "displayName": "Y Axis Label",
+                    "type": {
+                        "text": true
                     }
                 }
             }
@@ -82,5 +131,20 @@
             }
         }
     ],
+    "tooltips": {
+        "supportedTypes": {
+            "default": true,
+            "canvas": true
+        },
+        "roles": [
+            "Tooltips"
+        ],
+        "supportEnhancedTooltips": true
+    },
+    "drilldown": {
+        "roles": [
+            "category"
+        ]
+    },
     "privileges": []
 }

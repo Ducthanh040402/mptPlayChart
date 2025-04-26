@@ -1,6 +1,19 @@
 export interface DataPoint {
     x: number;
     y: number;
+    selectionId: powerbi.visuals.ISelectionId;
+    color: string;
+}
+export interface SettingsPanel {
+    color: string;
+    styleLine: string;
+    isDrawLine: boolean;
+    isDrawPoint: boolean;
+    isDrawGrid: boolean;
+    isDrawAxis: boolean;
+    isDrawLabel: boolean;
+    isDrawLegend: boolean;
+
 }
 
 export interface LineData {
@@ -8,11 +21,14 @@ export interface LineData {
     color: string;
     dataPoints: DataPoint[];
     isDrawLine: boolean;
+    isActiveAnimation: boolean;
+    format: string;
+    selectionId: powerbi.visuals.ISelectionId;
 }
 
 export interface Tooltip {
-    lineData : LineData[];
-    pointData : DataPoint[];
+    lineData: LineData[];
+    pointData: DataPoint[];
 }
 export const defaultColors = [
     "#ff0000",

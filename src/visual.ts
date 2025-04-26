@@ -28,6 +28,11 @@
 import powerbi from "powerbi-visuals-api";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 import "./../style/visual.less";
+import { createTooltipServiceWrapper, ITooltipServiceWrapper, TooltipEnabledDataPoint } from "powerbi-visuals-utils-tooltiputils";
+import { pointer } from "d3";
+import { scaleBand, scaleLinear, ScaleLinear, ScaleBand } from "d3-scale";
+import { dataViewObjects } from "powerbi-visuals-utils-dataviewutils";
+import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -35,13 +40,18 @@ import IVisual = powerbi.extensibility.visual.IVisual;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import FormattingModel = powerbi.visuals.FormattingModel;
+import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColorPalette;
+import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifier;
+import Fill = powerbi.Fill;
 
 import { VisualFormattingSettingsModel } from "./settings";
 import * as d3 from "d3";
 import { DataProcesser } from "./dataProcesser";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 import { renderLineChart } from "./renderLineChart";
+import { MouseEventChart } from "./mouseEvent";
 import { DataPoint, LineData, defaultColors } from "./interface"
+import { Animation } from "./renderAnimationChart";
 import {
     BaseType,
     select as d3Select,
@@ -57,11 +67,17 @@ export class Visual implements IVisual {
     private lineDataPoints: LineData[];
     private pointData: DataPoint[];
     private svg: Selection<SVGSVGElement>;
-
+    private tooltipServiceWrapper: ITooltipServiceWrapper;
+    private mouseEvent: MouseEventChart;
+    private selectionManager: ISelectionManager;
     constructor(options: VisualConstructorOptions) {
         console.log('Visual constructor', options);
         this.formattingSettingsService = new FormattingSettingsService();
         this.target = options.element;
+        this.host = options.host;
+        this.selectionManager = options.host.createSelectionManager();
+
+        this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, options.element);
         this.svg = d3Select(this.target)
             .append("svg")
             .classed("linechart", true);
@@ -69,19 +85,28 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
-        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews);
-        this.data = new DataProcesser(options);
+        this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews?.[0]);
+        //processData
+        this.data = new DataProcesser(options, this.host);
         this.lineDataPoints = this.data.processData();
+        //settings panel
+        this.formattingSettings.pushColorSetting(this.lineDataPoints);
+        this.formattingSettings.pushLinePointSetting(this.lineDataPoints);
+        this.formattingSettings.pushActiveAnimation(this.lineDataPoints)
         this.viewport = options.viewport
 
         console.log("dataUse", this.lineDataPoints)
         this.svg
             .attr("width", this.viewport.width)
             .attr("height", this.viewport.height);
-        this.svg = renderLineChart(this.lineDataPoints, this.viewport, this.svg, this.formattingSettings);
+        this.mouseEvent = new MouseEventChart(options, this.host);
 
+        this.svg = renderLineChart(this.lineDataPoints, options, this.viewport, this.svg, this.formattingSettings);
+        this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
+        this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints, this.selectionManager);
 
     }
+
 
 
     /**
@@ -91,4 +116,6 @@ export class Visual implements IVisual {
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }
+
+
 }
