@@ -48,6 +48,23 @@
                 }
             }
         },
+        "animationSettings": {
+            "displayName": "Animation Settings",
+            "properties": {
+                "animationSpeed": {
+                    "displayName": "Animation Speed (ms)",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "brightPointsCount": {
+                    "displayName": "Number of Bright Points",
+                    "type": {
+                        "numeric": true
+                    }
+                }
+            }
+        },
         "axisRange": {
             "displayName": "Axis Range",
             "properties": {

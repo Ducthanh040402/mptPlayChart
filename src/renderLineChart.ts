@@ -187,17 +187,18 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                 .x(d => x(d.x))
                 .y(d => Math.min(y(d.y), height));
 
+
             chartArea.append("path")
                 .datum(filteredData)
-                .attr("class", "line-interact")
+                .attr("class", `line-${index}`)
                 .attr("fill", "none")
                 .attr("stroke", lineData.color)
                 .attr("stroke-linejoin", "round")
                 .attr("stroke-linecap", "round")
-                .attr("stroke-width", 2.5)
+                .attr("stroke-width", 4)
                 .attr("d", line);
         } else {
-            // Hiển thị tất cả điểm tĩnh ban đầu
+
             chartArea.selectAll(`.point-${index}`)
                 .data(filteredData)
                 .enter().append("circle")
@@ -255,24 +256,82 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         // Reset all animations
         data.forEach((lineData, index) => {
             if (lineData.isActiveAnimation) {
-                // Remove existing points
-                chartArea.selectAll(`.point-${index}`).remove();
+                // Remove existing elements
+                chartArea.selectAll(`.point-${index}, .line-${index}`).remove();
 
-                // Redraw points with initial animation
                 const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
-                chartArea.selectAll(`.point-${index}`)
-                    .data(filteredData)
-                    .enter().append("circle")
-                    .attr("class", `point-${index}`)
-                    .attr("cx", d => x(d.x))
-                    .attr("cy", d => y(d.y))
-                    .attr("r", 4)
-                    .attr("fill", lineData.color)
-                    .style("opacity", 0)
-                    .transition()
-                    .duration(1000)
-                    .style("opacity", 1)
-                    .delay((d, i) => i * 500);
+                const totalPoints = filteredData.length;
+                const realspeed = settings.animationSettings.animationSpeed.value;
+                const brightPointsCount = settings.animationSettings.brightPointsCount.value;
+
+                if (lineData.isDrawLine) {
+                    // Line animation
+                    const line = d3.line<DataPoint>()
+                        .x(d => x(d.x))
+                        .y(d => Math.min(y(d.y), height));
+
+                    // Create segments between points
+                    for (let i = 0; i < filteredData.length - 1; i++) {
+                        const segment = [filteredData[i], filteredData[i + 1]];
+                        const path = chartArea.append("path")
+                            .attr("class", `line-${index}`)
+                            .attr("fill", "none")
+                            // .attr("stroke", "white")
+                            .attr("stroke-linejoin", "round")
+                            .attr("stroke-linecap", "round")
+                            .attr("stroke-width", 4)
+                            .attr("d", line(segment))
+                            .attr("stroke-dasharray", function () {
+                                return this.getTotalLength();
+                            })
+                            .attr("stroke-dashoffset", function () {
+                                return this.getTotalLength();
+                            });
+
+                        // Animate each segment
+                        path.transition()
+                            .duration(realspeed)
+                            .delay(i * realspeed)
+                            .attr("stroke", lineData.color)
+
+                            .attr("stroke-dashoffset", 0);
+                    }
+
+                } else {
+                    // Point animation
+                    chartArea.selectAll(`.point-${index}`)
+                        .data(filteredData)
+                        .enter()
+                        .append("circle")
+                        .attr("class", `point-${index}`)
+                        .attr("cx", d => x(d.x))
+                        .attr("cy", d => y(d.y))
+                        .attr("r", 4)
+                        .attr("fill", lineData.color)
+                        .style("opacity", 0)
+                        // First transition: fade in
+                        .transition()
+                        .duration(1000)
+                        .style("opacity", 1)
+                        .delay((d, i) => i * realspeed)
+                        // Second transition: fade out old points
+                        .transition()
+                        .duration(1000)
+                        .style("opacity", (d, i) => i >= totalPoints - brightPointsCount ? 1 : 0.3)
+                        .style("fill", (d, i) => i >= totalPoints - brightPointsCount ? lineData.color : "#ccc")
+                        .delay(realspeed)
+                        // Third transition: maintain state
+                        .transition()
+                        .duration(1000)
+                        .style("opacity", (d, i) => i >= totalPoints - brightPointsCount ? 1 : 0.3)
+                        .style("fill", (d, i) => i >= totalPoints - brightPointsCount ? lineData.color : "#ccc")
+                        .delay(realspeed)
+                        // Final transition: maintain state for remaining duration
+                        .transition()
+                        .duration((totalPoints - 1) * realspeed)
+                        .style("opacity", 1)
+                        .style("fill", (d, i) => i >= totalPoints - brightPointsCount ? lineData.color : "#ccc");
+                }
             }
         });
     });

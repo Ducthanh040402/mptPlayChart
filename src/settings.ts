@@ -58,9 +58,27 @@ class LineOrPointSettingCard extends Card {
 }
 class ActiveAnimation extends Card {
     name: string = "activeAnimation";
-    displayName?: string = "Active Animation";
+    displayName: string = "Active Animation";
     slices: Slice[] = [];
+}
 
+class AnimationSettingsCard extends Card {
+    name: string = "animationSettings";
+    displayName: string = "Animation Settings";
+
+    animationSpeed = new NumUpDown({
+        name: "animationSpeed",
+        displayName: "Animation Speed (ms)",
+        value: 500
+    });
+
+    brightPointsCount = new NumUpDown({
+        name: "brightPointsCount",
+        displayName: "Number of Bright Points",
+        value: 10
+    });
+
+    slices: Slice[] = [this.animationSpeed, this.brightPointsCount];
 }
 
 class AxisRangeCard extends Card {
@@ -161,9 +179,10 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     colorCard = new ColorSettingCard();
     linePointCard = new LineOrPointSettingCard()
     animation = new ActiveAnimation();
+    animationSettings = new AnimationSettingsCard();
     axisRange = new AxisRangeCard();
     axisLabels = new AxisLabelsCard();
-    cards = [this.colorCard, this.linePointCard, this.animation, this.axisRange, this.axisLabels];
+    cards = [this.colorCard, this.linePointCard, this.animation, this.animationSettings, this.axisRange, this.axisLabels];
 
     pushColorSetting(dataPoints: LineData[]) {
         const slices: Slice[] = this.colorCard.slices;
