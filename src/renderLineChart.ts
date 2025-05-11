@@ -89,7 +89,8 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
     // Tạo vùng chart-area bên dưới
     const chartArea = svg.append("g")
         .attr("class", "chart-area")
-        .attr("transform", `translate(${margin.left},${margin.top + 10})`);
+        .attr("transform", `translate(${margin.left},${margin.top + 10})`)
+        .style("pointer-events", "none"); // I disable mouse events to pass through, if not, the tooltip will not work and the line will not be drawn
 
     // Add title for X axis
     chartArea.append("text")
@@ -125,7 +126,8 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .attr("width", width)
         .attr("height", height + 10)
         .attr("class", "tooltip-overlay")
-        .attr("fill", "white");
+        .attr("fill", "white")
+        .style("pointer-events", "all"); //just for tooltip-overlay region active mouse event
 
     const xAxis = chartArea.append("g")
         .attr("class", "x-axis")
@@ -209,7 +211,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
     // Reset button
     const resetGroup = buttonArea.append("g")
         .attr("class", "reset-button")
-        .attr("transform", `translate(${margin.left + width - 25}, 10)`)
+        .attr("transform", `translate(${margin.left + width - 35}, 10)`)
         .style("pointer-events", "all");
 
     const resetButton = resetGroup.append("rect")
