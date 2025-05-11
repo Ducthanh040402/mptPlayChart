@@ -15,7 +15,7 @@ type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
     viewport: powerbi.IViewport, svg: Selection<SVGSVGElement>, settings: VisualFormattingSettingsModel) {
 
-    const margin = { top: 30, right: 0, bottom: 30, left: 50 };
+    const margin = { top: 30, right: 0, bottom: 60, left: 50 };
     const width = viewport.width - margin.left - margin.right;
     const height = viewport.height - margin.top - margin.bottom;
 
@@ -81,20 +81,27 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .domain(yDomain);
 
     svg.datum({ x, y })
-    const g = svg.append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Tạo vùng button-area ở trên cùng
+    const buttonArea = svg.append("g")
+        .attr("class", "button-area");
+
+    // Tạo vùng chart-area bên dưới
+    const chartArea = svg.append("g")
+        .attr("class", "chart-area")
+        .attr("transform", `translate(${margin.left},${margin.top + 10})`);
 
     // Add title for X axis
-    g.append("text")
+    chartArea.append("text")
         .attr("class", "x-axis-title")
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 5)
+        .attr("y", height + margin.bottom - 20)
         .style("font-size", "12px")
         .text(settings.axisLabels.xAxisLabel.value);
 
     // Add title for Y axis
-    g.append("text")
+    chartArea.append("text")
         .attr("class", "y-axis-title")
         .attr("text-anchor", "middle")
         .attr("transform", "rotate(-90)")
@@ -103,7 +110,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .style("font-size", "12px")
         .text(settings.axisLabels.yAxisLabel.value);
 
-    g.append("defs").append("clipPath")
+    chartArea.append("defs").append("clipPath")
         .attr("id", "clip")
         .append("rect")
         .attr("x", -5)
@@ -111,22 +118,21 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .attr("width", width)
         .attr("height", height + 10);
 
-    g.append("rect")
+    chartArea.append("rect")
         .attr("x", -5)
         .attr("y", -5)
         .datum(data)
         .attr("width", width)
         .attr("height", height + 10)
         .attr("class", "tooltip-overlay")
-
         .attr("fill", "white");
 
-    const xAxis = g.append("g")
+    const xAxis = chartArea.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x).ticks(5).tickFormat(d => d.toString()));
 
-    const yAxis = g.append("g")
+    const yAxis = chartArea.append("g")
         .attr("class", "y-axis")
         .call(d3.axisLeft(y).ticks(5).tickFormat(d => formatNumber(d)));
 
@@ -136,7 +142,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .ticks(5)
         .tickFormat(() => "");
 
-    g.append("g")
+    chartArea.append("g")
         .attr("class", "x-grid")
         .attr("transform", `translate(0,${height})`)
         .call(xGrid)
@@ -150,7 +156,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .ticks(5)
         .tickFormat(() => "");
 
-    g.append("g")
+    chartArea.append("g")
         .attr("class", "y-grid")
         .call(yGrid)
         .selectAll("path, line")
@@ -158,22 +164,13 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .style("opacity", 0.35)
         .style("stroke-dasharray", "1 4");
 
-    g.selectAll(".y-grid path, .x-grid path").style("stroke", "none");
+    chartArea.selectAll(".y-grid path, .x-grid path").style("stroke", "none");
 
     //#endregion
     xAxis.select("path").style("stroke", "none");
     xAxis.selectAll("line").style("stroke", "none");
     yAxis.select("path").style("stroke", "none");
     yAxis.selectAll("line").style("stroke", "none");
-
-
-    const chartArea = g.append("g")
-        .attr("class", "chart-area")
-        .style("pointer-events", "none") // I disable mouse events to pass through, if not, the tooltip will not work and the line will not be drawn
-        .attr("clip-path", "url(#clip)")
-    // .attr("transform", `translate(${margin.left}, ${margin.top })`);
-
-
 
     // data[1].isActiveAnimation = true
     var dataFiltered = []
@@ -187,7 +184,6 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                 .x(d => x(d.x))
                 .y(d => Math.min(y(d.y), height));
 
-
             chartArea.append("path")
                 .datum(filteredData)
                 .attr("class", `line-${index}`)
@@ -198,7 +194,6 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                 .attr("stroke-width", 4)
                 .attr("d", line);
         } else {
-
             chartArea.selectAll(`.point-${index}`)
                 .data(filteredData)
                 .enter().append("circle")
@@ -211,20 +206,15 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         }
     });
 
-    // Add reset button after chart-area
-    const buttonContainer = svg.append("g")
-        .attr("class", "button-container")
-        .raise();
-
     // Reset button
-    const resetGroup = buttonContainer.append("g")
+    const resetGroup = buttonArea.append("g")
         .attr("class", "reset-button")
-        .attr("transform", `translate(${margin.left + width - 35}, ${margin.top - 20})`)
+        .attr("transform", `translate(${margin.left + width - 25}, 10)`)
         .style("pointer-events", "all");
 
     const resetButton = resetGroup.append("rect")
-        .attr("width", 30)
-        .attr("height", 30)
+        .attr("width", 22)
+        .attr("height", 22)
         .attr("rx", 4)
         .attr("fill", "#f0f0f0")
         .attr("stroke", "#ccc")
@@ -232,12 +222,12 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
 
     // Reset icon using the provided SVG
     const resetIcon = resetGroup.append("g")
-        .attr("transform", "translate(5, 5)")
+        .attr("transform", "translate(4, 4)")
         .style("pointer-events", "none");
 
     resetIcon.append("svg")
-        .attr("width", 20)
-        .attr("height", 20)
+        .attr("width", 14)
+        .attr("height", 14)
         .attr("viewBox", "0 0 21 21")
         .append("g")
         .attr("fill", "none")

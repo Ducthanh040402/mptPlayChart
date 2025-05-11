@@ -51,7 +51,7 @@ type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 import { renderLineChart } from "./renderLineChart";
 import { MouseEventChart } from "./mouseEvent";
 import { DataPoint, LineData, defaultColors } from "./interface"
-import { Animation } from "./renderAnimationChart";
+
 import {
     BaseType,
     select as d3Select,
