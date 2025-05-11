@@ -127,24 +127,20 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .attr("height", height + 10)
         .attr("class", "tooltip-overlay")
         .attr("fill", "white")
-        .style("pointer-events", "all"); //just for tooltip-overlay region active mouse event
+        .style("pointer-events", "all");
 
-    const xAxis = chartArea.append("g")
-        .attr("class", "x-axis")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).ticks(5).tickFormat(d => d.toString()));
+    // Tạo group chart-content và gán clip-path
+    const chartContent = chartArea.append("g")
+        .attr("class", "chart-content")
+        .attr("clip-path", "url(#clip)");
 
-    const yAxis = chartArea.append("g")
-        .attr("class", "y-axis")
-        .call(d3.axisLeft(y).ticks(5).tickFormat(d => formatNumber(d)));
-
-    //#region Grid
+    // Vẽ grid, line, point, ... vào chartContent
     const xGrid = d3.axisBottom(x)
         .tickSize(-height)
         .ticks(5)
         .tickFormat(() => "");
 
-    chartArea.append("g")
+    chartContent.append("g")
         .attr("class", "x-grid")
         .attr("transform", `translate(0,${height})`)
         .call(xGrid)
@@ -158,7 +154,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .ticks(5)
         .tickFormat(() => "");
 
-    chartArea.append("g")
+    chartContent.append("g")
         .attr("class", "y-grid")
         .call(yGrid)
         .selectAll("path, line")
@@ -166,18 +162,10 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .style("opacity", 0.35)
         .style("stroke-dasharray", "1 4");
 
-    chartArea.selectAll(".y-grid path, .x-grid path").style("stroke", "none");
+    chartContent.selectAll(".y-grid path, .x-grid path").style("stroke", "none");
 
-    //#endregion
-    xAxis.select("path").style("stroke", "none");
-    xAxis.selectAll("line").style("stroke", "none");
-    yAxis.select("path").style("stroke", "none");
-    yAxis.selectAll("line").style("stroke", "none");
-
-    // data[1].isActiveAnimation = true
-    var dataFiltered = []
+    // Vẽ line/point vào chartContent (tĩnh, không animation)
     data.forEach((lineData, index) => {
-        var realspeed = 500; // ms
         const pointColor = lineData.color;
         const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
 
@@ -186,7 +174,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                 .x(d => x(d.x))
                 .y(d => Math.min(y(d.y), height));
 
-            chartArea.append("path")
+            chartContent.append("path")
                 .datum(filteredData)
                 .attr("class", `line-${index}`)
                 .attr("fill", "none")
@@ -196,7 +184,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                 .attr("stroke-width", 4)
                 .attr("d", line);
         } else {
-            chartArea.selectAll(`.point-${index}`)
+            chartContent.selectAll(`.point-${index}`)
                 .data(filteredData)
                 .enter().append("circle")
                 .attr("class", `point-${index}`)
@@ -207,6 +195,21 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                 .style("opacity", 1);
         }
     });
+
+    // Trục và axis giữ nguyên ngoài chartContent
+    const xAxis = chartArea.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(5).tickFormat(d => d.toString()));
+
+    const yAxis = chartArea.append("g")
+        .attr("class", "y-axis")
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d => formatNumber(d)));
+
+    xAxis.select("path").style("stroke", "none");
+    xAxis.selectAll("line").style("stroke", "none");
+    yAxis.select("path").style("stroke", "none");
+    yAxis.selectAll("line").style("stroke", "none");
 
     // Reset button
     const resetGroup = buttonArea.append("g")
@@ -249,7 +252,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         data.forEach((lineData, index) => {
             if (lineData.isActiveAnimation) {
                 // Remove existing elements
-                chartArea.selectAll(`.point-${index}, .line-${index}`).remove();
+                chartContent.selectAll(`.point-${index}, .line-${index}`).remove();
 
                 const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
                 const totalPoints = filteredData.length;
@@ -265,10 +268,9 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                     // Create segments between points
                     for (let i = 0; i < filteredData.length - 1; i++) {
                         const segment = [filteredData[i], filteredData[i + 1]];
-                        const path = chartArea.append("path")
+                        const path = chartContent.append("path")
                             .attr("class", `line-${index}`)
                             .attr("fill", "none")
-                            // .attr("stroke", "white")
                             .attr("stroke-linejoin", "round")
                             .attr("stroke-linecap", "round")
                             .attr("stroke-width", 4)
@@ -285,13 +287,12 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                             .duration(realspeed)
                             .delay(i * realspeed)
                             .attr("stroke", lineData.color)
-
                             .attr("stroke-dashoffset", 0);
                     }
 
                 } else {
                     // Point animation
-                    chartArea.selectAll(`.point-${index}`)
+                    chartContent.selectAll(`.point-${index}`)
                         .data(filteredData)
                         .enter()
                         .append("circle")
