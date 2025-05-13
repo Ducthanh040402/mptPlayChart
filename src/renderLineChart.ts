@@ -68,7 +68,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         xDomain = defaultXDomain;
         yDomain = defaultYDomain;
     } else {
-        xDomain = [settings.axisRange.xMin.value, settings.axisRange.xMax.value];
+        xDomain = [settings.axisRange.xMin.value - xMargin, settings.axisRange.xMax.value + xMargin];
         yDomain = [settings.axisRange.yMin.value, settings.axisRange.yMax.value];
     }
 
@@ -82,11 +82,11 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
 
     svg.datum({ x, y })
 
-    // Tạo vùng button-area ở trên cùng
+    // button area
     const buttonArea = svg.append("g")
         .attr("class", "button-area");
 
-    // Tạo vùng chart-area bên dưới
+    // create chart-Area 
     const chartArea = svg.append("g")
         .attr("class", "chart-area")
         .attr("transform", `translate(${margin.left},${margin.top + 10})`)
@@ -129,12 +129,10 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .attr("fill", "white")
         .style("pointer-events", "all");
 
-    // Tạo group chart-content và gán clip-path
     const chartContent = chartArea.append("g")
         .attr("class", "chart-content")
         .attr("clip-path", "url(#clip)");
 
-    // Vẽ grid, line, point, ... vào chartContent
     const xGrid = d3.axisBottom(x)
         .tickSize(-height)
         .ticks(5)
@@ -164,7 +162,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
 
     chartContent.selectAll(".y-grid path, .x-grid path").style("stroke", "none");
 
-    // Vẽ line/point vào chartContent (tĩnh, không animation)
+    // First draw, static chart
     data.forEach((lineData, index) => {
         const pointColor = lineData.color;
         const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
@@ -196,15 +194,14 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         }
     });
 
-    // Trục và axis giữ nguyên ngoài chartContent
     const xAxis = chartArea.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).ticks(5).tickFormat(d => d.toString()));
+        .call(d3.axisBottom(x).ticks(3).tickFormat(d => d.toString()));
 
     const yAxis = chartArea.append("g")
         .attr("class", "y-axis")
-        .call(d3.axisLeft(y).ticks(5).tickFormat(d => formatNumber(d)));
+        .call(d3.axisLeft(y).ticks(3).tickFormat(d => formatNumber(d)));
 
     xAxis.select("path").style("stroke", "none");
     xAxis.selectAll("line").style("stroke", "none");

@@ -32,8 +32,8 @@ import { createTooltipServiceWrapper, ITooltipServiceWrapper, TooltipEnabledData
 import { pointer } from "d3";
 import { scaleBand, scaleLinear, ScaleLinear, ScaleBand } from "d3-scale";
 import { dataViewObjects } from "powerbi-visuals-utils-dataviewutils";
-import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 
+import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
@@ -107,8 +107,6 @@ export class Visual implements IVisual {
 
     }
 
-
-
     /**
      * Returns properties pane formatting model content hierarchies, properties and latest formatting values, Then populate properties pane.
      * This method is called once every time we open properties pane or when the user edit any format property. 
@@ -116,6 +114,5 @@ export class Visual implements IVisual {
     public getFormattingModel(): powerbi.visuals.FormattingModel {
         return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }
-
 
 }

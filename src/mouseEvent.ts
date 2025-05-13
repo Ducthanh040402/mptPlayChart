@@ -18,22 +18,24 @@ export class MouseEventChart {
     private svg: d3.Selection<SVGSVGElement, any, any, any>;
     private tooltipServiceWrapper: ITooltipServiceWrapper;
 
-
     constructor(options: VisualUpdateOptions, host: powerbi.extensibility.visual.IVisualHost) {
         this.options = options;
         this.host = host;
     }
     public getTooltipData(closestPoint: any): powerbi.extensibility.VisualTooltipDataItem[] {
-        // console.log("value tooltip", closestPoint.DataPoint.x)
-        return [{
-            displayName: closestPoint.key,
-            value: `${closestPoint.DataPoint.y}`,
-            color: "red",
-            header: `${closestPoint.DataPoint.x}`
-        }]
-
+        var listPoint = [];
+        closestPoint.forEach(point => {
+            listPoint.push({
+                displayName: point.key,
+                value: `${point.DataPoint.y}`,
+                color: "red",
+                header: `${point.DataPoint.x}`
+            }
+            )
+        })
+        return listPoint;
     }
-    
+
     public mouseEventTooltip(svg: any, data: LineData[], tooltipServiceWrapper: ITooltipServiceWrapper) {
         const self = this;
         svg.select("rect.tooltip-overlay").on("mousemove", function (event) {
@@ -52,26 +54,37 @@ export class MouseEventChart {
             let [mouseX, mouseY] = d3.pointer(event);
             let mouseXValue = xScale.invert(mouseX);
 
-            let closestPoint: { DataPoint: DataPoint, key, color } | null = null;
+            // let closestPoint: { DataPoint: DataPoint, key, color } | null = null;
             let minDistance = Infinity;
+            let closestPoints = []; 
+
             data.forEach(lineData => {
                 lineData.dataPoints.forEach(point => {
                     let distance = Math.abs(point.x - mouseXValue);
                     if (distance < minDistance) {
                         minDistance = distance;
-                        closestPoint = {
-                            key: lineData.name,
-                            DataPoint: point,
-                            color: lineData.color
-                        };
                     }
                 });
             });
-            // console.log("closestPoint", closestPoint)
-            if (closestPoint !== null) {
+
+            data.forEach(lineData => {
+                lineData.dataPoints.forEach(point => {
+                    let distance = Math.abs(point.x - mouseXValue);
+                    if (distance === minDistance) {
+                        closestPoints.push({
+                            key: lineData.name,
+                            DataPoint: point,
+                            color: lineData.color
+                        });
+                    }
+                });
+            });
+
+            console.log("closestPoint", closestPoints)
+            if (closestPoints[0] !== null) {
                 // console.log("data", closestPoint)
-                const cx = xScale(closestPoint.DataPoint.x);
-                const cy = yScale(closestPoint.DataPoint.y);
+                const cx = xScale(closestPoints[0].DataPoint.x);
+                const cy = yScale(closestPoints[0].DataPoint.y);
                 svg.selectAll("g.chart-area").append("line")
                     .attr("class", "vertical-line")
                     .attr("x1", cx)
@@ -87,13 +100,13 @@ export class MouseEventChart {
                     .attr("cx", cx)
                     .attr("cy", cy)
                     .attr("r", 5)
-                    .attr("fill", closestPoint.color)
+                    .attr("fill", closestPoints[0].color)
                     .attr("stroke-width", 2)
                     .style("opacity", 1);
 
                 tooltipServiceWrapper.addTooltip(svg.select("rect.tooltip-overlay"),
-                    () => self.getTooltipData(closestPoint),
-                    () => closestPoint.DataPoint.selectionId,
+                    () => self.getTooltipData(closestPoints),
+                    () => null,
                     true
 
                 );
