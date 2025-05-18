@@ -56,7 +56,7 @@ export class MouseEventChart {
 
             // let closestPoint: { DataPoint: DataPoint, key, color } | null = null;
             let minDistance = Infinity;
-            let closestPoints = []; 
+            let closestPoints = [];
 
             data.forEach(lineData => {
                 lineData.dataPoints.forEach(point => {
@@ -100,7 +100,12 @@ export class MouseEventChart {
                     .attr("cx", cx)
                     .attr("cy", cy)
                     .attr("r", 5)
-                    .attr("fill", closestPoints[0].color)
+                    .attr("fill", d => {
+                        const line = data.find(l => l.name === closestPoints[0].key);
+                        return isLastPoint(line, closestPoints[0].DataPoint)
+                            ? (line.lastPointColor || line.color)
+                            : line.color;
+                    })
                     .attr("stroke-width", 2)
                     .style("opacity", 1);
 
@@ -191,3 +196,8 @@ export class MouseEventChart {
     }
 
 }
+
+const isLastPoint = (lineData, point) => {
+    const filtered = lineData.dataPoints.filter(d => d.y !== null && d.y !== undefined);
+    return filtered.length > 0 && point.x === filtered[filtered.length - 1].x && point.y === filtered[filtered.length - 1].y;
+};

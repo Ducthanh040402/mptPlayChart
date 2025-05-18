@@ -32,6 +32,15 @@
                             }
                         }
                     }
+                },
+                "lastPointColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
                 }
             }
         },

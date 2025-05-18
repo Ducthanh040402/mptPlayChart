@@ -165,8 +165,10 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
     // First draw, static chart
     data.forEach((lineData, index) => {
         const pointColor = lineData.color;
+        const lastPointColor = lineData.lastPointColor || lineData.color;
         const filteredData = lineData.dataPoints.filter(d => d.y !== 0);
-
+        const totalPoints = filteredData.length;
+        const brightPointsCount = settings.animationSettings.brightPointsCount.value;
         if (lineData.isDrawLine) {
             const line = d3.line<DataPoint>()
                 .x(d => x(d.x))
@@ -184,13 +186,15 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         } else {
             chartContent.selectAll(`.point-${index}`)
                 .data(filteredData)
-                .enter().append("circle")
+                .enter()
+                .append("circle")
                 .attr("class", `point-${index}`)
                 .attr("cx", d => x(d.x))
                 .attr("cy", d => y(d.y))
                 .attr("r", 4)
-                .attr("fill", lineData.color)
-                .style("opacity", 1);
+                .attr("fill", (d, i) => i === filteredData.length - 1 ? (lineData.lastPointColor || lineData.color) : lineData.color)
+                .style("opacity", (d, i) => i >= totalPoints - brightPointsCount ? 1 : 0.3)
+                .style("fill", (d, i) => i === totalPoints - 1 ? (lineData.lastPointColor || lineData.color) : (i >= totalPoints - brightPointsCount ? lineData.color : lineData.color))
         }
     });
 
@@ -297,7 +301,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                         .attr("cx", d => x(d.x))
                         .attr("cy", d => y(d.y))
                         .attr("r", 4)
-                        .attr("fill", lineData.color)
+                        .attr("fill", (d, i) => i === filteredData.length - 1 ? (lineData.lastPointColor || lineData.color) : lineData.color)
                         .style("opacity", 0)
                         // First transition: fade in
                         .transition()
@@ -308,19 +312,15 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
                         .transition()
                         .duration(1000)
                         .style("opacity", (d, i) => i >= totalPoints - brightPointsCount ? 1 : 0.3)
-                        .style("fill", (d, i) => i >= totalPoints - brightPointsCount ? lineData.color : "#ccc")
+                        .style("fill", (d, i) => i === totalPoints - 1 ? (lineData.lastPointColor || lineData.color) : (i >= totalPoints - brightPointsCount ? lineData.color : lineData.color))
                         .delay(realspeed)
                         // Third transition: maintain state
                         .transition()
                         .duration(1000)
                         .style("opacity", (d, i) => i >= totalPoints - brightPointsCount ? 1 : 0.3)
-                        .style("fill", (d, i) => i >= totalPoints - brightPointsCount ? lineData.color : "#ccc")
+                        .style("fill", (d, i) => i === totalPoints - 1 ? (lineData.lastPointColor || lineData.color) : (i >= totalPoints - brightPointsCount ? lineData.color : lineData.color))
                         .delay(realspeed)
-                        // Final transition: maintain state for remaining duration
-                        .transition()
-                        .duration((totalPoints - 1) * realspeed)
-                        .style("opacity", 1)
-                        .style("fill", (d, i) => i >= totalPoints - brightPointsCount ? lineData.color : "#ccc");
+
                 }
             }
         });

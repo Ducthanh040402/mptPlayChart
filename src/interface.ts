@@ -24,6 +24,7 @@ export interface LineData {
     isActiveAnimation: boolean;
     format: string;
     selectionId: powerbi.visuals.ISelectionId;
+    lastPointColor?: string;
 }
 
 export interface Tooltip {

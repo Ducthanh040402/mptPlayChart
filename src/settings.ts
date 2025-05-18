@@ -199,6 +199,12 @@ export class VisualFormattingSettingsModel extends FormattingSettingsModel {
                     value: { value: dataPoint.color },
                     selector: selector
                 }));
+                slices.push(new ColorPicker({
+                    name: "lastPointColor",
+                    displayName: "(Last Point) " + dataPoint.name,
+                    value: { value: dataPoint.lastPointColor || dataPoint.color },
+                    selector: selector
+                }));
             });
         }
     }

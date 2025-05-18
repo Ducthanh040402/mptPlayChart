@@ -48,7 +48,7 @@ export class DataProcesser {
             isDrawLine: getBoolenValueToDrawLineOrPoint(dataView.metadata, index + 1),
             isActiveAnimation: activeAnimation(dataView.metadata, index + 1),
             format: ySeries.objects ? <string>ySeries.objects[index].general.formatString : null,
-
+            lastPointColor: getLastPointColorByIndex(categorical.categories[0], dataView.metadata, index + 1, colorPalette),
             dataPoints: xValues.map((x, i) => {
                 if (ySeries[i] == null) return null;
                 return {
@@ -134,4 +134,34 @@ function activeAnimation(
         isActiveAnimation = dataViewObjects.getValue(object, prop, isActiveAnimation);
     }
     return isActiveAnimation;
+}
+
+function getLastPointColorByIndex(
+    category: DataViewCategoryColumn,
+    metadata: any,
+    index: number,
+    colorPalette: ISandboxExtendedColorPalette,
+): string {
+    if (colorPalette.isHighContrast) {
+        return colorPalette.background.value;
+    }
+
+    const defaultColor: Fill = {
+        solid: {
+            color: colorPalette.getColor(`${category.values[index]}`).value,
+        }
+    };
+
+    const prop: DataViewObjectPropertyIdentifier = {
+        objectName: "colorSelector",
+        propertyName: "lastPointColor"
+    };
+
+    let colorFromObjects: Fill;
+    if (metadata.columns[index + 1].objects) {
+        const objects = metadata.columns[index + 1].objects as DataViewObjects;
+        colorFromObjects = dataViewObjects.getValue<Fill>(objects, prop);
+    }
+
+    return colorFromObjects?.solid.color ?? defaultColor.solid.color;
 }
