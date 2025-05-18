@@ -6,6 +6,11 @@
             "kind": "Grouping"
         },
         {
+            "displayName": "Order By Timestamp",
+            "name": "timestamp",
+            "kind": "Measure"
+        },
+        {
             "displayName": "Measure Data",
             "name": "measure",
             "kind": "Measure"
@@ -133,6 +138,16 @@
                 },
                 "values": {
                     "select": [
+                        {
+                            "bind": {
+                                "to": "timestamp"
+                            },
+                            "dataReductionAlgorithm": {
+                                "window": {
+                                    "count": 30000
+                                }
+                            }
+                        },
                         {
                             "bind": {
                                 "to": "measure"

@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import powerbi from "powerbi-visuals-api";
 import { VisualFormattingSettingsModel } from "./settings";
-import { DataPoint, LineData, defaultColors } from "./interface"
+import { DataPoint, LineData, defaultColors } from "./interface";
 
 import { scaleBand, scaleLinear, ScaleLinear, ScaleBand } from "d3-scale";
 import {

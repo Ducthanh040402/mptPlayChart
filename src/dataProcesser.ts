@@ -36,28 +36,32 @@ export class DataProcesser {
         const colorPalette: ISandboxExtendedColorPalette = this.host.colorPalette;
         const dataViewOB = dataViewObjects;
         var xValues = categorical.categories[0].values;
-        var yValues = categorical.values.map(element => element.values);
-        var seriesNames = categorical.values.map(element => element.source.displayName);
+        var timestampValues = categorical.values[0].values;
+        var yValues = categorical.values.slice(1).map(element => element.values);
+        var seriesNames = categorical.values.slice(1).map(element => element.source.displayName);
 
 
         debugger
         var alldata: LineData[] = yValues.map((ySeries, index) => ({
             name: seriesNames[index],
-            color: getColumnColorByIndex(categorical.categories[0], dataView.metadata, index, colorPalette),
-            isDrawLine: getBoolenValueToDrawLineOrPoint(dataView.metadata, index),
-            isActiveAnimation: activeAnimation(dataView.metadata, index),
+            color: getColumnColorByIndex(categorical.categories[0], dataView.metadata, index + 1, colorPalette),
+            isDrawLine: getBoolenValueToDrawLineOrPoint(dataView.metadata, index + 1),
+            isActiveAnimation: activeAnimation(dataView.metadata, index + 1),
             format: ySeries.objects ? <string>ySeries.objects[index].general.formatString : null,
 
-            dataPoints: xValues.map((x, i) => ({
-                x: +x,
-                y: +ySeries[i],
-                selectionId: this.host.createSelectionIdBuilder()
-                    .withCategory(categorical.categories[0], i)
-                    .createSelectionId(),
-            })).sort((a, b) => a.x - b.x).filter(d => d.y !== 0),
+            dataPoints: xValues.map((x, i) => {
+                if (ySeries[i] == null) return null;
+                return {
+                    x: +x,
+                    y: +ySeries[i],
+                    selectionId: this.host.createSelectionIdBuilder()
+                        .withCategory(categorical.categories[0], i)
+                        .createSelectionId(),
+                };
+            }).filter(Boolean),
 
             selectionId: this.host.createSelectionIdBuilder()
-                .withMeasure(categorical.values[index].source.queryName)
+                .withMeasure(categorical.values[index + 1].source.queryName)
                 .createSelectionId()
         }));
 
