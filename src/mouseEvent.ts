@@ -28,11 +28,10 @@ export class MouseEventChart {
             listPoint.push({
                 displayName: point.key,
                 value: `${point.DataPoint.y}`,
-                color: "red",
+                color: point.color,
                 header: `${point.DataPoint.x}`
-            }
-            )
-        })
+            });
+        });
         return listPoint;
     }
 

@@ -45,7 +45,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
     const yMin = d3.min(data, d => d3.min(d.dataPoints, p => p.y))!;
     const yMax = d3.max(data, d => d3.max(d.dataPoints, p => p.y))!;
 
-    // Add 5% margin for both axes
+    // Add % margin for both axes
     const xMargin = (xMax - xMin) * 0.02;
     const yMargin = (yMax - yMin) * 0.02;
 
@@ -126,7 +126,7 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .attr("width", width)
         .attr("height", height + 10)
         .attr("class", "tooltip-overlay")
-        .attr("fill", "white")
+        .attr("fill", "none")
         .style("pointer-events", "all");
 
     const chartContent = chartArea.append("g")
@@ -211,6 +211,115 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
     xAxis.selectAll("line").style("stroke", "none");
     yAxis.select("path").style("stroke", "none");
     yAxis.selectAll("line").style("stroke", "none");
+
+    //#region Legend
+    const legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", `translate(${margin.left - 50}, 10   )`);
+
+    const legendAreaWidth = width; // 100px buffer for button
+    const legendItemWidth = legendAreaWidth / data.length;
+
+    const legendItems = legend.selectAll(".legend-item")
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("class", "legend-item")
+        .attr("transform", (d, i) => `translate(${i * legendItemWidth}, 0)`); // responsive spacing
+
+    // Responsive legend: truncate text with ellipsis if not enough space
+    const minTextWidth = 30; // minimum width for text (px)
+    const circleWidth = 20; // width for circle and margin
+    const maxTextWidth = Math.max(
+        minTextWidth,
+        Math.floor((legendAreaWidth / data.length) - circleWidth)
+    );
+
+    const getResponsiveTitle = (title: string, maxWidth: number): string => {
+        const charWidth = 8;
+        const maxChars = Math.floor(maxWidth / charWidth);
+        if (title.length > maxChars) {
+            return title.substring(0, Math.max(0, maxChars - 1)) + "...";
+        }
+        return title;
+    };
+
+    const legendGap = 10;
+
+    let selectedLegendIndex: number | null = null;
+
+    // Append circle 
+    legendItems.append("circle")
+        .attr("cx", 8)
+        .attr("cy", 8)
+        .attr("r", 5)
+        .attr("fill", d => d.color)
+        .style("cursor", "pointer")
+        .on("click", function (event, d: LineData) {
+            const index = data.indexOf(d);
+            if (selectedLegendIndex === index) {
+                // unselect
+                selectedLegendIndex = null;
+                data.forEach((ld, i) => {
+                    chartContent.select(`.line-${i}`).style("opacity", "1");
+                    chartContent.selectAll(`.point-${i}`).style("opacity", (d: LineData, i) => i >= d.dataPoints.length - settings.animationSettings.brightPointsCount.value ? 1 : 0.3);
+                });
+            } else {
+                // select
+                selectedLegendIndex = index;
+                data.forEach((ld, i) => {
+                    if (i === index) {
+                        chartContent.select(`.line-${i}`).style("opacity", "1");
+                        chartContent.selectAll(`.point-${i}`).style("opacity", (d: LineData, i) => i >= d.dataPoints.length - settings.animationSettings.brightPointsCount.value ? 1 : 0.3);
+                    } else {
+                        chartContent.select(`.line-${i}`).style("opacity", "0.3");
+                        chartContent.selectAll(`.point-${i}`).style("opacity", "0.3");
+                    }
+                });
+            }
+        });
+
+    // Append text
+    legendItems.append("text")
+        .attr("x", 16)
+        .attr("y", 12)
+        .attr("font-size", "13px")
+        .attr("cursor", "pointer")
+        .attr("fill", "#999")
+        .text(d => getResponsiveTitle(d.name, maxTextWidth))
+        .on("click", function (event, d: LineData) {
+            const index = data.indexOf(d);
+            if (selectedLegendIndex === index) {
+                selectedLegendIndex = null;
+                data.forEach((ld, i) => {
+                    chartContent.select(`.line-${i}`).style("opacity", "1");
+                    chartContent.selectAll(`.point-${i}`).style("opacity", (d: LineData, i) => i >= d.dataPoints.length - settings.animationSettings.brightPointsCount.value ? 1 : 0.3);
+                });
+            } else {
+                selectedLegendIndex = index;
+                data.forEach((ld, i) => {
+                    if (i === index) {
+                        chartContent.select(`.line-${i}`).style("opacity", "1");
+                        chartContent.selectAll(`.point-${i}`).style("opacity", (d: LineData, i) => i >= d.dataPoints.length - settings.animationSettings.brightPointsCount.value ? 1 : 0.3);
+                    } else {
+                        chartContent.select(`.line-${i}`).style("opacity", "0.3");
+                        chartContent.selectAll(`.point-${i}`).style("opacity", "0.3");
+                    }
+                });
+            }
+        });
+
+    // Adjust legend item positions
+    requestAnimationFrame(() => {
+        let offset = 0;
+        legendItems.each(function (d, i) {
+            const textNode = d3.select(this).select("text").node() as SVGTextElement;
+            const textWidth = textNode ? textNode.getComputedTextLength() : 60;
+            d3.select(this).attr("transform", `translate(${offset}, 0)`);
+            offset += 7 * 2 + 6 + textWidth + legendGap;
+        });
+    });
+    //#endregion
 
     // Reset button
     const resetGroup = buttonArea.append("g")
