@@ -68,8 +68,8 @@ class AnimationSettingsCard extends Card {
 
     animationSpeed = new NumUpDown({
         name: "animationSpeed",
-        displayName: "Animation Speed (ms)",
-        value: 500
+        displayName: "Transition Speed (ms)",
+        value: 300
     });
 
     brightPointsCount = new NumUpDown({

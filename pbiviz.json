@@ -1,10 +1,10 @@
 {
     "visual": {
-        "name": "mptPlayChart",
-        "displayName": "mptPlayChart",
-        "guid": "mptPlayChart",
+        "name": "MPT_Chart",
+        "displayName": "MPT_Chart",
+        "guid": "mptChart",
         "visualClassName": "Visual",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "just Test",
         "supportUrl": "https://akselos.com",
         "gitHubUrl": ""
@@ -12,7 +12,7 @@
     "apiVersion": "5.1.0",
     "author": {
         "name": "thanh",
-        "email": "thanh442002@gmail.com"
+        "email": "thanh.dinh@akselos.com"
     },
     "assets": {
         "icon": "assets/icon_chart.png"

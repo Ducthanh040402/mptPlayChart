@@ -86,22 +86,23 @@ export class Visual implements IVisual {
 
     public update(options: VisualUpdateOptions) {
         this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, options.dataViews?.[0]);
+        this.viewport = options.viewport
         //processData
         this.data = new DataProcesser(options, this.host);
         this.lineDataPoints = this.data.processData();
-        //settings panel
+        //add settings panel
         this.formattingSettings.pushColorSetting(this.lineDataPoints);
         this.formattingSettings.pushLinePointSetting(this.lineDataPoints);
         this.formattingSettings.pushActiveAnimation(this.lineDataPoints)
-        this.viewport = options.viewport
 
         console.log("dataUse", this.lineDataPoints)
+        //create svg
         this.svg
             .attr("width", this.viewport.width)
             .attr("height", this.viewport.height);
-        this.mouseEvent = new MouseEventChart(options, this.host);
-
         this.svg = renderLineChart(this.lineDataPoints, options, this.viewport, this.svg, this.formattingSettings);
+        //tooltip-selection
+        this.mouseEvent = new MouseEventChart(options, this.host);
         this.mouseEvent.mouseEventTooltip(this.svg, this.lineDataPoints, this.tooltipServiceWrapper);
         this.mouseEvent.mouseEventSelection(this.svg, this.lineDataPoints, this.selectionManager);
 
