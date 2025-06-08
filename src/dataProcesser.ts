@@ -11,6 +11,9 @@ import DataViewObjectPropertyIdentifier = powerbi.DataViewObjectPropertyIdentifi
 import ISandboxExtendedColorPalette = powerbi.extensibility.ISandboxExtendedColorPalette;
 import { dataViewObjects } from "powerbi-visuals-utils-dataviewutils";
 type DataViewObjects = { [name: string]: any };
+import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
+
+
 
 
 export class DataProcesser {
@@ -34,14 +37,20 @@ export class DataProcesser {
         const dataView = this.options.dataViews[0];
         const categorical = dataView.categorical;
         const colorPalette: ISandboxExtendedColorPalette = this.host.colorPalette;
-        const dataViewOB = dataViewObjects;
+
         var xValues = categorical.categories[0].values;
-        var timestampValues = categorical.values[0].values;
-        var yValues = categorical.values.slice(1).map(element => element.values);
+        var xFormat = categorical.categories[0].source.format || null;
+        // var yValues = categorical.values.slice(1).map(element => element.values);
+        var yValues = categorical.values.slice(1).map((element, index) => ({
+            values: element.values,
+            format: element.source.format || null
+        }));
+        var timeValues = categorical.values[0].values;
+        console.log("timeValues", timeValues[0].toString())
         var seriesNames = categorical.values.slice(1).map(element => element.source.displayName);
 
+        var formatData = getFormatData(dataView.metadata)
 
-        debugger
         var alldata: LineData[] = yValues.map((ySeries, index) => ({
             name: seriesNames[index],
             color: getColumnColorByIndex(categorical.categories[0], dataView.metadata, index + 1, colorPalette),
@@ -50,10 +59,14 @@ export class DataProcesser {
             format: ySeries.objects ? <string>ySeries.objects[index].general.formatString : null,
             lastPointColor: getLastPointColorByIndex(categorical.categories[0], dataView.metadata, index + 1, colorPalette),
             dataPoints: xValues.map((x, i) => {
-                if (ySeries[i] == null) return null;
+                if (ySeries.values[i] == null) return null;
+
                 return {
                     x: +x,
-                    y: +ySeries[i],
+                    y: +ySeries.values[i],
+                    formatX: xFormat,
+                    formatY: ySeries.format,
+                    time: formatToMMDDYYYY_HHMM(timeValues[i].toString()),
                     selectionId: this.host.createSelectionIdBuilder()
                         .withCategory(categorical.categories[0], i)
                         .createSelectionId(),
@@ -70,6 +83,37 @@ export class DataProcesser {
         return this.data;
     }
 
+}
+function formatToMMDDYYYY_HHMM(isoString) {
+    const date = new Date(isoString);
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log("timeZone", timeZone)
+    const options = { timeZone };
+    const localDate = new Date(date.toLocaleString("en-US", options));
+
+    const mm = String(localDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(localDate.getDate()).padStart(2, '0');
+    const yyyy = localDate.getFullYear();
+    const hh = String(localDate.getHours()).padStart(2, '0');
+    const min = String(localDate.getMinutes()).padStart(2, '0');
+    const sec = String(localDate.getSeconds()).padStart(2, '0');
+
+    return `${mm}-${dd}-${yyyy} ${hh}:${min}:${sec}`;
+}
+
+function getFormatData(metadata: any): any {
+    var format_data;
+    var list_format_data = []
+    metadata.columns.forEach(_data => {
+        let format_type = _data.format;
+        if (_data.roles.timestamp)
+            console.log("time")
+        if (format_type) {
+            format_data = format_type;
+        }
+        list_format_data.push({ name: _data.queryName, _format: format_data })
+    })
+    return list_format_data;
 }
 
 function getColumnColorByIndex(

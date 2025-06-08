@@ -158,6 +158,36 @@ class AxisLabelsCard extends Card {
         value: "X Axis",
         placeholder: "Enter X axis label"
     });
+    xAxisDefaultFontFamily = new formattingSettings.FontControl({
+        name: "xAxisDefaultFontFamily",
+        displayName: "Font Family",
+        fontFamily: new formattingSettings.FontPicker({
+            name: 'fontFamily',
+            displayName: 'Font Family',
+            value: 'Calibri'
+        }),
+        fontSize: new formattingSettings.NumUpDown({
+            name: 'fontSize',
+            displayName: 'Font Size',
+            value: 12
+        }),
+        bold: new formattingSettings.ToggleSwitch({
+            name: 'bold',
+            displayName: 'Bold',
+            value: false
+        }),
+        italic: new formattingSettings.ToggleSwitch({
+            name: 'italic',
+            displayName: 'Italic',
+            value: false
+        }),
+        underline: new formattingSettings.ToggleSwitch({
+            name: 'underline',
+            displayName: 'Underline',
+            value: false
+        })
+    })
+
 
     yAxisLabel = new formattingSettings.TextInput({
         name: "yAxisLabel",
@@ -165,8 +195,38 @@ class AxisLabelsCard extends Card {
         value: "Y Axis",
         placeholder: "Enter Y axis label"
     });
+    yAxisDefaultFontFamily = new formattingSettings.FontControl({
+        name: "yAxisDefaultFontFamily",
+        displayName: "Font Family",
+        fontFamily: new formattingSettings.FontPicker({
+            name: 'fontFamily',
+            displayName: 'Font Family',
+            value: 'Calibri'
+        }),
+        fontSize: new formattingSettings.NumUpDown({
+            name: 'fontSize',
+            displayName: 'Font Size',
+            value: 12
+        }),
+        bold: new formattingSettings.ToggleSwitch({
+            name: 'bold',
+            displayName: 'Bold',
+            value: false
+        }),
+        italic: new formattingSettings.ToggleSwitch({
+            name: 'italic',
+            displayName: 'Italic',
+            value: false
+        }),
+        underline: new formattingSettings.ToggleSwitch({
+            name: 'underline',
+            displayName: 'Underline',
+            value: false
+        })
+    })
 
-    slices: Slice[] = [this.xAxisLabel, this.yAxisLabel];
+
+    slices: Slice[] = [this.xAxisLabel, this.xAxisDefaultFontFamily, this.yAxisLabel, this.yAxisDefaultFontFamily];
 }
 
 /**

@@ -1,8 +1,11 @@
 export interface DataPoint {
     x: number;
     y: number;
+    time: any;
     selectionId: powerbi.visuals.ISelectionId;
     color: string;
+    formatX: string;
+    formatY: string;
 }
 export interface SettingsPanel {
     color: string;

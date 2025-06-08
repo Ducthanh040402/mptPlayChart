@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import powerbi from "powerbi-visuals-api";
 import { VisualFormattingSettingsModel } from "./settings";
 import { DataPoint, LineData, defaultColors } from "./interface";
+import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 
 import { scaleBand, scaleLinear, ScaleLinear, ScaleBand } from "d3-scale";
 import {
@@ -201,7 +202,20 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
     const xAxis = chartArea.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x).ticks(3).tickFormat(d => d.toString()));
+        .call(d3.axisBottom(x).ticks(3).tickFormat(d => {
+            // Find the corresponding dataPoint to get its format
+            const dataPoint = data[0].dataPoints[0];
+            console.log("DataPoint format:", {
+                x: d,
+                formatX: dataPoint.formatX,
+                dataPoint: dataPoint
+            });
+            if (dataPoint.formatX) {
+                const formatter = valueFormatter.create({ format: dataPoint.formatX });
+                return formatter.format(d);
+            }
+            return `${d}`;
+        }));
 
     const yAxis = chartArea.append("g")
         .attr("class", "y-axis")
@@ -279,6 +293,38 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
             }
         });
 
+    // Add lastest point legend only if isDrawLine is false
+    legendItems.filter(d => !d.isDrawLine)
+        .append("circle")
+        .attr("cx", 8)
+        .attr("cy", 20)
+        .attr("r", 5)
+        .attr("fill", d => d.lastPointColor || d.color)
+        .style("cursor", "pointer")
+        .on("click", function (event, d: LineData) {
+            const index = data.indexOf(d);
+            if (selectedLegendIndex === index) {
+                // unselect
+                selectedLegendIndex = null;
+                data.forEach((ld, i) => {
+                    chartContent.select(`.line-${i}`).style("opacity", "1");
+                    chartContent.selectAll(`.point-${i}`).style("opacity", (d: LineData, i) => i >= d.dataPoints.length - settings.animationSettings.brightPointsCount.value ? 1 : 0.3);
+                });
+            } else {
+                // select
+                selectedLegendIndex = index;
+                data.forEach((ld, i) => {
+                    if (i === index) {
+                        chartContent.select(`.line-${i}`).style("opacity", "1");
+                        chartContent.selectAll(`.point-${i}`).style("opacity", (d: LineData, i) => i >= d.dataPoints.length - settings.animationSettings.brightPointsCount.value ? 1 : 0.3);
+                    } else {
+                        chartContent.select(`.line-${i}`).style("opacity", "0.3");
+                        chartContent.selectAll(`.point-${i}`).style("opacity", "0.3");
+                    }
+                });
+            }
+        });
+
     // Append text
     legendItems.append("text")
         .attr("x", 16)
@@ -287,6 +333,37 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .attr("cursor", "pointer")
         .attr("fill", "#999")
         .text(d => getResponsiveTitle(d.name, maxTextWidth))
+        .on("click", function (event, d: LineData) {
+            const index = data.indexOf(d);
+            if (selectedLegendIndex === index) {
+                selectedLegendIndex = null;
+                data.forEach((ld, i) => {
+                    chartContent.select(`.line-${i}`).style("opacity", "1");
+                    chartContent.selectAll(`.point-${i}`).style("opacity", (d: LineData, i) => i >= d.dataPoints.length - settings.animationSettings.brightPointsCount.value ? 1 : 0.3);
+                });
+            } else {
+                selectedLegendIndex = index;
+                data.forEach((ld, i) => {
+                    if (i === index) {
+                        chartContent.select(`.line-${i}`).style("opacity", "1");
+                        chartContent.selectAll(`.point-${i}`).style("opacity", (d: LineData, i) => i >= d.dataPoints.length - settings.animationSettings.brightPointsCount.value ? 1 : 0.3);
+                    } else {
+                        chartContent.select(`.line-${i}`).style("opacity", "0.3");
+                        chartContent.selectAll(`.point-${i}`).style("opacity", "0.3");
+                    }
+                });
+            }
+        });
+
+    // Add lastest point text only if isDrawLine is false
+    legendItems.filter(d => !d.isDrawLine)
+        .append("text")
+        .attr("x", 16)
+        .attr("y", 24)
+        .attr("font-size", "13px")
+        .attr("cursor", "pointer")
+        .attr("fill", "#999")
+        .text(d => getResponsiveTitle("Lastest " + d.name, maxTextWidth))
         .on("click", function (event, d: LineData) {
             const index = data.indexOf(d);
             if (selectedLegendIndex === index) {

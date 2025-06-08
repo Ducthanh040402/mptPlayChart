@@ -9,6 +9,7 @@ import { DataPoint, LineData, defaultColors } from "./interface"
 import { renderLineChart } from "./renderLineChart";
 import { VisualFormattingSettingsModel } from "./settings";
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import { valueFormatter } from "powerbi-visuals-utils-formattingutils";
 
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 
@@ -24,12 +25,24 @@ export class MouseEventChart {
     }
     public getTooltipData(closestPoint: any): powerbi.extensibility.VisualTooltipDataItem[] {
         var listPoint = [];
+        const xFormatter = closestPoint[0].DataPoint.formatX ?
+            valueFormatter.create({ format: closestPoint[0].DataPoint.formatX }) : null;
+
+        listPoint.push({
+            displayName: `${this.options.dataViews[0].categorical.categories[0].source.displayName}`,
+            value: xFormatter ? xFormatter.format(closestPoint[0].DataPoint.x) : `${closestPoint[0].DataPoint.x}`,
+            color: closestPoint[0].color,
+            header: `${closestPoint[0].DataPoint.time}`
+        })
         closestPoint.forEach(point => {
+            const yFormatter = point.DataPoint.formatY ?
+                valueFormatter.create({ format: point.DataPoint.formatY }) : null;
+
             listPoint.push({
                 displayName: point.key,
-                value: `${point.DataPoint.y}`,
+                value: yFormatter ? yFormatter.format(point.DataPoint.y) : `${point.DataPoint.y}`,
                 color: point.color,
-                header: `${point.DataPoint.x}`
+                header: `${point.DataPoint.time}`
             });
         });
         return listPoint;
