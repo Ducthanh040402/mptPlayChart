@@ -99,8 +99,13 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .attr("text-anchor", "middle")
         .attr("x", width / 2)
         .attr("y", height + margin.bottom - 20)
-        .style("font-size", "12px")
+        .style("font-size", settings.axisLabels.xAxisDefaultFontFamily.fontSize.value)
+        .style("font-weight", settings.axisLabels.xAxisDefaultFontFamily.bold.value ? "bold" : "normal")
+        .style("font-style", settings.axisLabels.xAxisDefaultFontFamily.italic.value ? "italic" : "normal")
+        .style("text-decoration", settings.axisLabels.xAxisDefaultFontFamily.underline.value ? "underline" : "none")
+        .style("font-family", settings.axisLabels.xAxisDefaultFontFamily.fontFamily.value)
         .text(settings.axisLabels.xAxisLabel.value);
+
 
     // Add title for Y axis
     chartArea.append("text")
@@ -109,7 +114,11 @@ export function renderLineChart(data: LineData[], options: VisualUpdateOptions,
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
         .attr("y", -margin.left + 15)
-        .style("font-size", "12px")
+        .style("font-size", settings.axisLabels.yAxisDefaultFontFamily.fontSize.value)
+        .style("font-weight", settings.axisLabels.yAxisDefaultFontFamily.bold.value ? "bold" : "normal")
+        .style("font-style", settings.axisLabels.yAxisDefaultFontFamily.italic.value ? "italic" : "normal")
+        .style("text-decoration", settings.axisLabels.yAxisDefaultFontFamily.underline.value ? "underline" : "none")
+        .style("font-family", settings.axisLabels.yAxisDefaultFontFamily.fontFamily.value)
         .text(settings.axisLabels.yAxisLabel.value);
 
     chartArea.append("defs").append("clipPath")

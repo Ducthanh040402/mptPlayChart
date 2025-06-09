@@ -122,41 +122,69 @@
                     "type": {
                         "text": true
                     }
-                },
-                
-                "fontSize": {
+                },        
+                "X_fontSize": {
                     "type": {
                         "formatting": {
                             "fontSize": true
                         }
                     }
                 },
-                "fontFamily": {
+                "X_fontFamily": {
                     "type": {
                         "formatting": {
                             "fontFamily": true
                         }
                     }
                 },
-                "bold": {
+                "X_bold": {
                     "type": {
                         "bool": true
                     }
                 },
-                "underline": {
+                "X_underline": {
                     "type": {
                         "bool": true
                     }
                 },
-                "italic": {
+                "X_italic": {
                     "type": {
                         "bool": true
                     }
                 },
-                "yAxisLabel": {
+                "y_AxisLabel": {
                     "displayName": "Y Axis Label",
                     "type": {
                         "text": true
+                    }
+                },
+                "Y_fontSize": {
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "Y_fontFamily": {
+                    "type": {
+                        "formatting": {
+                            "fontFamily": true
+                        }
+                    }
+                },
+                "Y_bold": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "Y_underline": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "Y_italic": {
+                    "type": {
+                        "bool": true
                     }
                 }
             }

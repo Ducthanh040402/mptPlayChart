@@ -44,7 +44,7 @@ import { LineData } from "./interface";
 /**
  * Data Point Formatting Card
  */
-
+const DEFAULTNUM = 999999999999
 
 class ColorSettingCard extends Card {
     name: string = "colorSelector";
@@ -94,52 +94,52 @@ class AxisRangeCard extends Card {
     xMin = new NumUpDown({
         name: "xMin",
         displayName: "X Min (Auto)",
-        value: 0
+        value: -DEFAULTNUM
     });
 
     xMax = new NumUpDown({
         name: "xMax",
         displayName: "X Max (Auto)",
-        value: 0
+        value: DEFAULTNUM
     });
 
     yMin = new NumUpDown({
         name: "yMin",
         displayName: "Y Min (Auto)",
-        value: 0
+        value: -DEFAULTNUM
     });
 
     yMax = new NumUpDown({
         name: "yMax",
         displayName: "Y Max (Auto)",
-        value: 0
+        value: DEFAULTNUM
     });
 
     slices: Slice[] = [this.autoRange, this.xMin, this.xMax, this.yMin, this.yMax];
 
     updateDefaultRange(xMin: number, xMax: number, yMin: number, yMax: number) {
-        if (this.xMin.value === 0) {
+        if (this.xMin.value === -DEFAULTNUM) {
             this.xMin.value = xMin;
             this.xMin.displayName = "X Min (Auto)";
         } else {
             this.xMin.displayName = "X Min";
         }
 
-        if (this.xMax.value === 0) {
+        if (this.xMax.value === DEFAULTNUM) {
             this.xMax.value = xMax;
             this.xMax.displayName = "X Max (Auto)";
         } else {
             this.xMax.displayName = "X Max";
         }
 
-        if (this.yMin.value === 0) {
+        if (this.yMin.value === -DEFAULTNUM) {
             this.yMin.value = yMin;
             this.yMin.displayName = "Y Min (Auto)";
         } else {
             this.yMin.displayName = "Y Min";
         }
 
-        if (this.yMax.value === 0) {
+        if (this.yMax.value === DEFAULTNUM) {
             this.yMax.value = yMax;
             this.yMax.displayName = "Y Max (Auto)";
         } else {
@@ -154,7 +154,7 @@ class AxisLabelsCard extends Card {
 
     xAxisLabel = new formattingSettings.TextInput({
         name: "xAxisLabel",
-        displayName: "X Axis Label",
+        displayName: "X Axis Title",
         value: "X Axis",
         placeholder: "Enter X axis label"
     });
@@ -162,27 +162,27 @@ class AxisLabelsCard extends Card {
         name: "xAxisDefaultFontFamily",
         displayName: "Font Family",
         fontFamily: new formattingSettings.FontPicker({
-            name: 'fontFamily',
+            name: 'X_fontFamily',
             displayName: 'Font Family',
-            value: 'Calibri'
+            value: 'wf_standard-font, helvetica, arial, sans-serif'
         }),
         fontSize: new formattingSettings.NumUpDown({
-            name: 'fontSize',
+            name: 'X_fontSize',
             displayName: 'Font Size',
             value: 12
         }),
         bold: new formattingSettings.ToggleSwitch({
-            name: 'bold',
+            name: 'X_bold',
             displayName: 'Bold',
             value: false
         }),
         italic: new formattingSettings.ToggleSwitch({
-            name: 'italic',
+            name: 'X_italic',
             displayName: 'Italic',
             value: false
         }),
         underline: new formattingSettings.ToggleSwitch({
-            name: 'underline',
+            name: 'X_underline',
             displayName: 'Underline',
             value: false
         })
@@ -191,7 +191,7 @@ class AxisLabelsCard extends Card {
 
     yAxisLabel = new formattingSettings.TextInput({
         name: "yAxisLabel",
-        displayName: "Y Axis Label",
+        displayName: "Y Axis Title",
         value: "Y Axis",
         placeholder: "Enter Y axis label"
     });
@@ -199,27 +199,27 @@ class AxisLabelsCard extends Card {
         name: "yAxisDefaultFontFamily",
         displayName: "Font Family",
         fontFamily: new formattingSettings.FontPicker({
-            name: 'fontFamily',
+            name: 'Y_fontFamily',
             displayName: 'Font Family',
-            value: 'Calibri'
+            value: 'wf_standard-font, helvetica, arial, sans-serif'
         }),
         fontSize: new formattingSettings.NumUpDown({
-            name: 'fontSize',
+            name: 'Y_fontSize',
             displayName: 'Font Size',
             value: 12
         }),
         bold: new formattingSettings.ToggleSwitch({
-            name: 'bold',
+            name: 'Y_bold',
             displayName: 'Bold',
             value: false
         }),
         italic: new formattingSettings.ToggleSwitch({
-            name: 'italic',
+            name: 'Y_italic',
             displayName: 'Italic',
             value: false
         }),
         underline: new formattingSettings.ToggleSwitch({
-            name: 'underline',
+            name: 'Y_underline',
             displayName: 'Underline',
             value: false
         })
